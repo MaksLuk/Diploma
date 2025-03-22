@@ -35,3 +35,9 @@ export type UniversityType = {
     name: string;
     faculties: FacultyType[];
 };
+
+/// Интерфейс для входных данных компонентов
+export interface UniversityTableProps {
+    data: UniversityType[];
+    setData: React.Dispatch<React.SetStateAction<UniversityType[]>>;
+}
