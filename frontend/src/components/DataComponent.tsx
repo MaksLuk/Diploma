@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { UniversityTable } from './UniversityTable.tsx';
 import { LecturersTable } from './LecturersTable.tsx';
 import { ClassroomsTable } from './ClassroomsTable.tsx';
-import { UniversityType } from '../types';
+import { SubjectsTable } from './SubjectsTable.tsx';
+import { UniversityType, SubjectType } from '../types';
 
 /// В компоненте описаны все элементы на вкладке "Данные"
 export const DataComponent = () => {
-  const [data, setData] = useState<UniversityType[]>([
+  const [universityData, setUniversityData] = useState<UniversityType[]>([
     {
       id: 1,
       name: "Московский университет",
@@ -140,20 +141,29 @@ export const DataComponent = () => {
       ]
     }
   ]);
+  const [subjects, setSubjects] = useState<SubjectType[]>([
+    { id: 1, name: "Биология" },
+    { id: 2, name: "Химия" },
+    { id: 3, name: "Физика" },
+  ]);
 
   return (
     <>
       <UniversityTable
-        data={data}
-        setData={setData}
+        data={universityData}
+        setData={setUniversityData}
       />
       <LecturersTable
-        data={data}
-        setData={setData}
+        data={universityData}
+        setData={setUniversityData}
       />
       <ClassroomsTable
-        data={data}
-        setData={setData}
+        data={universityData}
+        setData={setUniversityData}
+      />
+      <SubjectsTable
+        data={subjects}
+        setData={setSubjects}
       />
     </>
   );

@@ -41,3 +41,8 @@ export interface UniversityTableProps {
     data: UniversityType[];
     setData: React.Dispatch<React.SetStateAction<UniversityType[]>>;
 }
+
+export type SubjectType = {
+    id: number;
+    name: string;
+};
