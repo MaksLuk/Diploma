@@ -9,6 +9,7 @@ export interface SubjectsTableProps {
 export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState("");
+  const [newSubjectShortName, setNewSubjectShortName] = useState("");
 
   const addSubject = () => {
     const currentId = 
@@ -20,11 +21,12 @@ export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
       {
         id: currentId,
         name: newSubjectName,
-        faculties: []
+        shortName: newSubjectShortName,
       }
     ]);
     setIsModalOpen(false);
     setNewSubjectName("");
+    setNewSubjectShortName("");
   };
 
   return (
@@ -54,14 +56,21 @@ export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
         <div className="modal">
           <input
             type="text"
-            placeholder="Название университета"
+            placeholder="Название предмета"
             value={newSubjectName}
             onChange={(e) => setNewSubjectName(e.target.value)}
             className="input-field"
           />
+          <input
+            type="text"
+            placeholder="Сокращение"
+            value={newSubjectShortName}
+            onChange={(e) => setNewSubjectShortName(e.target.value)}
+            className="input-field"
+          />
           <button
             onClick={addSubject}
-            disabled={!newSubjectName}
+            disabled={!newSubjectName || !newSubjectShortName}
           >
             Добавить
           </button>

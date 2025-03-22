@@ -168,9 +168,10 @@ export const DataComponent = () => {
     }
   ]);
   const [subjects, setSubjects] = useState<SubjectType[]>([
-    { id: 1, name: "Биология" },
-    { id: 2, name: "Химия" },
-    { id: 3, name: "Физика" },
+    { id: 1, name: "Биология", shortName: "Биология" },
+    { id: 2, name: "Химия", shortName: "Химия" },
+    { id: 3, name: "Физика", shortName: "Физика" },
+    { id: 4, name: "Основны объектно-ориентировааного программирования", shortName: "Основы ООП" },
   ]);
   const [flows, setFlows] = useState<FlowType[]>([
     { id: 1, groups: ["ПИ-101", "ПИ-102"] },

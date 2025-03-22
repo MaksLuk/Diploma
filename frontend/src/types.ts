@@ -52,6 +52,7 @@ export interface UniversityTableProps {
 export type SubjectType = {
     id: number;
     name: string;
+    shortName: string;  // Сокращение
 };
 
 // Потоки
