@@ -4,6 +4,7 @@ import { LecturersTable } from './LecturersTable.tsx';
 import { ClassroomsTable } from './ClassroomsTable.tsx';
 import { SubjectsTable } from './SubjectsTable.tsx';
 import { FlowsTable } from './flowsTable.tsx';
+import { Syllabus } from './Syllabus.tsx';
 import { UniversityType, SubjectType, FlowType } from '../types';
 
 /// В компоненте описаны все элементы на вкладке "Данные"
@@ -215,6 +216,7 @@ export const DataComponent = () => {
         data={flows}
         setData={setFlows}
       />
+      <Syllabus />
     </>
   );
 };
