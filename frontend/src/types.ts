@@ -60,3 +60,12 @@ export type FlowType = {
     id: number;
     groups: string[];
 };
+
+// Учебный план
+export type SyllabusType = {
+    id: number;
+    subject: string;    // Идентификация предмета по полному имени
+    groups: string[];   // Список групп
+    hours: number;  // Число часов за семестр
+    attestation: string;    // Вид аттестации
+};

@@ -5,7 +5,7 @@ import { ClassroomsTable } from './ClassroomsTable.tsx';
 import { SubjectsTable } from './SubjectsTable.tsx';
 import { FlowsTable } from './flowsTable.tsx';
 import { Syllabus } from './Syllabus.tsx';
-import { UniversityType, SubjectType, FlowType } from '../types';
+import { UniversityType, SubjectType, FlowType, SyllabusType } from '../types';
 
 /// В компоненте описаны все элементы на вкладке "Данные"
 export const DataComponent = () => {
@@ -177,9 +177,18 @@ export const DataComponent = () => {
     { id: 1, groups: ["ПИ-101", "ПИ-102"] },
     { id: 2, groups: ["ПИ-101", "АЛГ-201", "АЛГ-202"] },
   ]);
+  const [syllabusData, setSyllabusData] = useState<SyllabusType[]>([
+    {
+      id: 1,
+      subject: "Биология",
+      groups: ["ПИ-101", "ПИ-102"],
+      hours: 144,
+      attestation: "Зачёт"
+    }
+  ]);
 
   // Получение все названия групп из университетских данных
-  const groupNames = useMemo(() => {
+  const groupNames = useMemo<string[]>(() => {
     const getAllGroups = (data: UniversityType[]): string[] => {
       return data.flatMap(university => 
         university.faculties.flatMap(faculty => 
@@ -217,7 +226,13 @@ export const DataComponent = () => {
         data={flows}
         setData={setFlows}
       />
-      <Syllabus />
+      <Syllabus
+        data={syllabusData}
+        setData={setSyllabusData}
+        subjects={subjects}
+        allGroups={groupNames}
+        flows={flows}
+      />
     </>
   );
 };
