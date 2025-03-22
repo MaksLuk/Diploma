@@ -233,14 +233,11 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     }));
 
     // Сбрасываем состояние
-    setIsAddGroupModalOpen(false);
-    setSelectedUniversityIdToGroup(null);
-    setSelectedFacultyIdToGroup(null);
-    setSelectedDepartmentIdToGroup(null);
-    setSelectedSpecialityIdToGroup(null);
-    setNewGroupName('');
-    setSelectedCourse('');
-    setStudentsCount(15);
+    setIsAddSpecialityModalOpen(false);
+    setSelectedUniversityIdToSpeciality(null);
+    setSelectedFacultyIdToSpeciality(null);
+    setSelectedDepartmentIdToSpeciality(null);
+    setNewSpecialityName('');
   };
   
   const addGroup = () => {
