@@ -116,8 +116,8 @@ export const FlowsTable = ({ allGroups, data, setData }: FlowsTableProps) => {
                       padding: '8px',
                       cursor: 'pointer',
                       borderBottom: '1px solid #eee',
-                      '&:hover': { backgroundColor: '#f0f0f0' }
                     }}
+                    className="suggestion"
                   >
                     {group}
                   </div>
@@ -135,8 +135,8 @@ export const FlowsTable = ({ allGroups, data, setData }: FlowsTableProps) => {
                 color: 'white',
                 border: 'none',
                 cursor: 'pointer',
-                '&:disabled': { opacity: 0.6 }
               }}
+              className={`add-button ${!inputValue || !allGroups.includes(inputValue) ? 'disabled' : ''}`}
             >
               Добавить
             </button>
