@@ -34,12 +34,17 @@ export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
       <h2>Предметы</h2>
       <table border={1} cellPadding="5" cellSpacing="0">
       <thead>
+        <tr>
+          <th>Название</th>
+          <th>Сокращение</th>
+        </tr>
       </thead>
       <tbody>
         {data.map((subject) => (
           <React.Fragment key={subject.id}>
             <tr>
-              <th>{subject.name}</th>
+              <td>{subject.name}</td>
+              <td>{subject.shortName}</td>
             </tr>
           </React.Fragment>
         ))}
