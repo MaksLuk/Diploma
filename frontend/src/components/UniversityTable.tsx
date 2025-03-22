@@ -309,7 +309,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
             type="text"
             placeholder="Название университета"
             value={newUniversityName}
-            onChange={(e) => setNewUniversityName(e.target.value.trim())}
+            onChange={(e) => setNewUniversityName(e.target.value)}
             className="input-field"
           />
           <button
@@ -346,7 +346,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
               type="text"
               placeholder="Название факультета"
               value={newFacultyName}
-              onChange={(e) => setNewFacultyName(e.target.value.trim())}
+              onChange={(e) => setNewFacultyName(e.target.value)}
               className="input-field"
             />
           </div>
@@ -412,7 +412,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
               type="text"
               className="input-field"
               value={newDepartmentName}
-              onChange={(e) => setNewDepartmentName(e.target.value.trim())}
+              onChange={(e) => setNewDepartmentName(e.target.value)}
             />
           </div>
 

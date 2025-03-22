@@ -48,7 +48,7 @@ export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
                       ...department,
                       lecturers: [
                         ...department.lecturers,
-                        { id: newId, fullName: newLecturerName.trim() }
+                        { id: newId, fullName: newLecturerName }
                       ]
                     };
                   }
