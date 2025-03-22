@@ -14,11 +14,18 @@ type GroupType = {
     course: string;
     studentsCount: number;
 };
+
+/// Специальности
+type SpecialitiesType = {
+    id: number;
+    name: string;
+    groups: GroupType[];
+}
   
 type DepartmentType = {
     id: number;
     name: string;
-    groups: GroupType[];
+    specialities: SpecialitiesType[];
     lecturers: LecturerType[];
     classrooms: ClassroomType[];
 };

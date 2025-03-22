@@ -19,18 +19,24 @@ export const DataComponent = () => {
             {
               id: 1,
               name: "Кафедра программирования",
-              groups: [ // Теперь группы хранятся напрямую в кафедре
+              specialities: [
                 {
                   id: 1,
-                  name: "ПИ-101",
-                  course: "Бакалавриат, 1", // Новое свойство
-                  studentsCount: 30
-                },
-                {
-                  id: 2,
-                  name: "ПИ-102",
-                  course: "Бакалавриат, 1",
-                  studentsCount: 25
+                  name: "ПИ",
+                  groups: [
+                    {
+                      id: 1,
+                      name: "ПИ-101",
+                      course: "Бакалавриат, 1",
+                      studentsCount: 30
+                    },
+                    {
+                      id: 2,
+                      name: "ПИ-102",
+                      course: "Бакалавриат, 1",
+                      studentsCount: 25
+                    }
+                  ],
                 }
               ],
               lecturers: [
@@ -55,18 +61,24 @@ export const DataComponent = () => {
             {
               id: 2,
               name: "Кафедра алгебры",
-              groups: [
+              specialities: [
                 {
-                  id: 3,
-                  name: "АЛГ-201",
-                  course: "Магистратура, 1",
-                  studentsCount: 20
-                },
-                {
-                  id: 4,
-                  name: "АЛГ-202",
-                  course: "Магистратура, 1",
-                  studentsCount: 22
+                  id: 1,
+                  name: "АЛГ",
+                  groups: [
+                    {
+                      id: 3,
+                      name: "АЛГ-201",
+                      course: "Магистратура, 1",
+                      studentsCount: 20
+                    },
+                    {
+                      id: 4,
+                      name: "АЛГ-202",
+                      course: "Магистратура, 1",
+                      studentsCount: 22
+                    }
+                  ]
                 }
               ],
               lecturers: [
@@ -91,18 +103,24 @@ export const DataComponent = () => {
             {
               id: 3,
               name: "Кафедра теоретической физики",
-              groups: [
+              specialities: [
                 {
-                  id: 5,
-                  name: "ФИЗ-101",
-                  course: "Бакалавриат, 1",
-                  studentsCount: 28
-                },
-                {
-                  id: 6,
-                  name: "ФИЗ-102",
-                  course: "Бакалавриат, 1",
-                  studentsCount: 32
+                  id: 1,
+                  name: "ФИЗ",
+                  groups: [
+                    {
+                      id: 5,
+                      name: "ФИЗ-101",
+                      course: "Бакалавриат, 1",
+                      studentsCount: 28
+                    },
+                    {
+                      id: 6,
+                      name: "ФИЗ-102",
+                      course: "Бакалавриат, 1",
+                      studentsCount: 32
+                    }
+                  ]
                 }
               ],
               lecturers: [],
@@ -118,18 +136,24 @@ export const DataComponent = () => {
             {
               id: 4,
               name: "Кафедра органической химии",
-              groups: [
+              specialities: [
                 {
-                  id: 7,
-                  name: "ХИМ-201",
-                  course: "Магистратура, 2",
-                  studentsCount: 18
-                },
-                {
-                  id: 8,
-                  name: "ХИМ-202",
-                  course: "Магистратура, 2",
-                  studentsCount: 21
+                  id: 1,
+                  name: "ХИМ",
+                  groups: [
+                    {
+                      id: 7,
+                      name: "ХИМ-201",
+                      course: "Магистратура, 2",
+                      studentsCount: 18
+                    },
+                    {
+                      id: 8,
+                      name: "ХИМ-202",
+                      course: "Магистратура, 2",
+                      studentsCount: 21
+                    }
+                  ]
                 }
               ],
               lecturers: [],

@@ -17,22 +17,30 @@ const COURSES = [
 
 export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
   // Упрощает добавление университетов/факультетов/кафдер/групп
+  // Добавление университета
   const [isAddUniversityModalOpen, setIsAddUniversityModalOpen] = useState(false);
   const [newUniversityName, setNewUniversityName] = useState("");
-
+  // Добавление факультета
   const [isAddFacultyModalOpen, setIsAddFacultyModalOpen] = useState(false);
   const [selectedUniversityIdToFaculty, setSelectedUniversityIdToFaculty] = useState<number|null>(null);
   const [newFacultyName, setNewFacultyName] = useState("");
-
+  // Добавление кафедры
   const [isAddDepartmentModalOpen, setIsAddDepartmentModalOpen] = useState(false);
   const [selectedUniversityIdToDepartment, setSelectedUniversityIdToDepartment] = useState<number|null>(null);
   const [selectedFacultyIdToDepartment, setSelectedFacultyIdToDepartment] = useState<number|null>(null);
   const [newDepartmentName, setNewDepartmentName] = useState('');
-
+  // Добавление специальности
+  const [isAddSpecialityModalOpen, setIsAddSpecialityModalOpen] = useState(false);
+  const [selectedUniversityIdToSpeciality, setSelectedUniversityIdToSpeciality] = useState<number|null>(null);
+  const [selectedFacultyIdToSpeciality, setSelectedFacultyIdToSpeciality] = useState<number|null>(null);
+  const [selectedDepartmentIdToSpeciality, setSelectedDepartmentIdToSpeciality] = useState<number|null>(null);
+  const [newSpecialityName, setNewSpecialityName] = useState('');
+  // Добавление группы
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
   const [selectedUniversityIdToGroup, setSelectedUniversityIdToGroup] = useState<number|null>(null);
   const [selectedFacultyIdToGroup, setSelectedFacultyIdToGroup] = useState<number|null>(null);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number|null>(null);
+  const [selectedDepartmentIdToGroup, setSelectedDepartmentIdToGroup] = useState<number|null>(null);
+  const [selectedSpecialityIdToGroup, setSelectedSpecialityIdToGroup] = useState<number|null>(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [studentsCount, setStudentsCount] = useState(15);
@@ -43,13 +51,28 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
   }, [selectedUniversityIdToDepartment]);
 
   useEffect(() => {
+    setSelectedFacultyIdToSpeciality(null);
+    setSelectedDepartmentIdToSpeciality(null);
+  }, [selectedUniversityIdToSpeciality]);
+
+  useEffect(() => {
+    setSelectedDepartmentIdToSpeciality(null);
+  }, [selectedFacultyIdToSpeciality]);
+
+  useEffect(() => {
     setSelectedFacultyIdToGroup(null);
-    setSelectedDepartmentId(null);
+    setSelectedDepartmentIdToGroup(null);
+    setSelectedSpecialityIdToGroup(null);
   }, [selectedUniversityIdToGroup]);
 
   useEffect(() => {
-    setSelectedDepartmentId(null);
+    setSelectedDepartmentIdToGroup(null);
+    setSelectedSpecialityIdToGroup(null);
   }, [selectedFacultyIdToGroup]);
+
+  useEffect(() => {
+    setSelectedSpecialityIdToGroup(null);
+  }, [selectedDepartmentIdToGroup]);
 
   const addUniversity = () => {
     const currentId = 
@@ -133,7 +156,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
                   {
                     id: newId,
                     name: newDepartmentName,
-                    groups: [],
+                    specialities: [],
                     lecturers: [],
                     classrooms: []
                   }
@@ -153,49 +176,47 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedUniversityIdToDepartment(null);
     setNewDepartmentName('');
   };
-  
-  const addGroup = () => {
+
+  const addSpeciality = () => {
     if (
-      !selectedUniversityIdToGroup ||
-      !selectedFacultyIdToGroup ||
-      !selectedDepartmentId ||
-      !newGroupName ||
-      !selectedCourse
+      !selectedUniversityIdToSpeciality ||
+      !selectedFacultyIdToSpeciality ||
+      !selectedDepartmentIdToSpeciality ||
+      !newSpecialityName
     ) return;
 
     // Находим выбранную кафедру
-    const selectedUniversity = data.find(u => u.id === selectedUniversityIdToGroup);
+    const selectedUniversity = data.find(u => u.id === selectedUniversityIdToSpeciality);
     if (!selectedUniversity) return;
-    const selectedFaculty = selectedUniversity.faculties.find(f => f.id === selectedFacultyIdToGroup);
+    const selectedFaculty = selectedUniversity.faculties.find(f => f.id === selectedFacultyIdToSpeciality);
     if (!selectedFaculty) return;
-    const selectedDepartment = selectedFaculty.departments.find(d => d.id === selectedDepartmentId);
+    const selectedDepartment = selectedFaculty.departments.find(d => d.id === selectedDepartmentIdToSpeciality);
     if (!selectedDepartment) return;
 
-    // Генерируем новый ID группы
-    const newId = selectedDepartment.groups.length > 0
-      ? Math.max(...selectedDepartment.groups.map(g => g.id)) + 1
+    // Генерируем новый ID специальности
+    const newId = selectedDepartment.specialities.length > 0
+      ? Math.max(...selectedDepartment.specialities.map(g => g.id)) + 1
       : 1;
 
-    // Добавляем группу
+    // Добавляем специальность
     setData(prevData => prevData.map(university => {
-      if (university.id === selectedUniversityIdToGroup) {
+      if (university.id === selectedUniversityIdToSpeciality) {
         return {
           ...university,
           faculties: university.faculties.map(faculty => {
-            if (faculty.id === selectedFacultyIdToGroup) {
+            if (faculty.id === selectedFacultyIdToSpeciality) {
               return {
                 ...faculty,
                 departments: faculty.departments.map(department => {
-                  if (department.id === selectedDepartmentId) {
+                  if (department.id === selectedDepartmentIdToSpeciality) {
                     return {
                       ...department,
-                      groups: [
-                        ...department.groups,
+                      specialities: [
+                        ...department.specialities,
                         {
                           id: newId,
-                          name: newGroupName,
-                          course: selectedCourse,
-                          studentsCount: studentsCount
+                          name: newSpecialityName,
+                          groups: []
                         }
                       ]
                     };
@@ -215,7 +236,87 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setIsAddGroupModalOpen(false);
     setSelectedUniversityIdToGroup(null);
     setSelectedFacultyIdToGroup(null);
-    setSelectedDepartmentId(null);
+    setSelectedDepartmentIdToGroup(null);
+    setSelectedSpecialityIdToGroup(null);
+    setNewGroupName('');
+    setSelectedCourse('');
+    setStudentsCount(15);
+  };
+  
+  const addGroup = () => {
+    if (
+      !selectedUniversityIdToGroup ||
+      !selectedFacultyIdToGroup ||
+      !selectedDepartmentIdToGroup ||
+      !selectedSpecialityIdToGroup ||
+      !newGroupName ||
+      !selectedCourse
+    ) return;
+
+    // Находим выбранную специальность
+    const selectedUniversity = data.find(u => u.id === selectedUniversityIdToGroup);
+    if (!selectedUniversity) return;
+    const selectedFaculty = selectedUniversity.faculties.find(f => f.id === selectedFacultyIdToGroup);
+    if (!selectedFaculty) return;
+    const selectedDepartment = selectedFaculty.departments.find(d => d.id === selectedDepartmentIdToGroup);
+    if (!selectedDepartment) return;
+    const selectedSpeciality = selectedDepartment.specialities.find(s => s.id === selectedSpecialityIdToGroup);
+    if (!selectedSpeciality) return;
+
+    // Генерируем новый ID группы
+    const newId = selectedSpeciality.groups.length > 0
+      ? Math.max(...selectedSpeciality.groups.map(g => g.id)) + 1
+      : 1;
+
+    // Добавляем группу
+    setData(prevData => prevData.map(university => {
+      if (university.id === selectedUniversityIdToGroup) {
+        return {
+          ...university,
+          faculties: university.faculties.map(faculty => {
+            if (faculty.id === selectedFacultyIdToGroup) {
+              return {
+                ...faculty,
+                departments: faculty.departments.map(department => {
+                  if (department.id === selectedDepartmentIdToGroup) {
+                    return {
+                      ...department,
+                      specialities: department.specialities.map(speciality => {
+                        if (speciality.id === selectedSpecialityIdToGroup) {
+                          return {
+                            ...speciality,
+                            groups: [
+                              ...speciality.groups,
+                              {
+                                id: newId,
+                                name: newGroupName,
+                                course: selectedCourse,
+                                studentsCount: studentsCount
+                              }
+                            ]
+                          };
+                        }
+                        return speciality;
+                      })
+                    };
+                  }
+                  return department;
+                })
+              };
+            }
+            return faculty;
+          })
+        };
+      }
+      return university;
+    }));
+
+    // Сбрасываем состояние
+    setIsAddGroupModalOpen(false);
+    setSelectedUniversityIdToGroup(null);
+    setSelectedFacultyIdToGroup(null);
+    setSelectedDepartmentIdToGroup(null);
+    setSelectedSpecialityIdToGroup(null);
     setNewGroupName('');
     setSelectedCourse('');
     setStudentsCount(15);
@@ -229,6 +330,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
         <tr>
           <th>Факультет</th>
           <th>Кафедра</th>
+          <th>Специальность</th>
           <th>Курс</th>
           <th>Группа</th>
           <th>Число студентов</th>
@@ -238,7 +340,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
         {data.map((university) => (
           <React.Fragment key={university.id}>
             <tr>
-              <th colSpan={6}>{university.name}</th>
+              <th colSpan={7}>{university.name}</th>
             </tr>
 
             {university.faculties.map((faculty) => (
@@ -251,30 +353,48 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                   </tr>
                 )}
 
                 {faculty.departments.map((department) => (
                   <React.Fragment key={department.id}>
-                    {/* Строка кафедры, если нет групп */}
-                    {department.groups.length === 0 && (
+                    {/* Строка кафедры, если нет специальностей */}
+                    {department.specialities.length === 0 && (
                       <tr>
                         <td>{faculty.name}</td>
                         <td>{department.name}</td>
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td></td>
                       </tr>
                     )}
 
-                    {department.groups.map((group) => (
-                      <tr key={group.id}>
-                        <td>{faculty.name}</td>
-                        <td>{department.name}</td>
-                        <td>{group.course}</td>
-                        <td>{group.name}</td>
-                        <td>{group.studentsCount}</td>
-                      </tr>
+                    {department.specialities.map((speciality) => (
+                      <React.Fragment key={speciality.id}>
+                        {speciality.groups.length === 0 && (
+                          <tr>
+                            <td>{faculty.name}</td>
+                            <td>{department.name}</td>
+                            <td>{speciality.name}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                        )}
+
+                        {speciality.groups.map((group) => (
+                          <tr key={group.id}>
+                            <td>{faculty.name}</td>
+                            <td>{department.name}</td>
+                            <td>{speciality.name}</td>
+                            <td>{group.course}</td>
+                            <td>{group.name}</td>
+                            <td>{group.studentsCount}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
                     ))}
                   </React.Fragment>
                 ))}
@@ -296,6 +416,10 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     
         <button onClick={() => setIsAddDepartmentModalOpen(true)}>
           Добавить кафедру
+        </button>
+
+        <button onClick={() => setIsAddSpecialityModalOpen(true)}>
+          Добавить специальность
         </button>
     
         <button onClick={() => setIsAddGroupModalOpen(true)}>
@@ -436,6 +560,97 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
         </div>
       )}
 
+      {isAddSpecialityModalOpen && (
+        <div className="modal">
+          <h3>Добавить группу</h3>
+
+          <div className="form-group">
+            <label>Университет:</label>
+            <select
+              className="styled-select"
+              value={selectedUniversityIdToSpeciality || ''}
+              onChange={(e) => setSelectedUniversityIdToSpeciality(parseInt(e.target.value))}
+            >
+              <option value="">Выберите университет</option>
+              {data.map(university => (
+                <option key={university.id} value={university.id}>
+                  {university.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Факультет:</label>
+            <select
+              className="styled-select"
+              disabled={!selectedUniversityIdToSpeciality}
+              value={selectedFacultyIdToSpeciality || ''}
+              onChange={(e) => setSelectedFacultyIdToSpeciality(parseInt(e.target.value))}
+            >
+              <option value="">Выберите факультет</option>
+              {selectedUniversityIdToSpeciality && (
+                data.find(u => u.id === selectedUniversityIdToSpeciality)?.faculties.map(faculty => (
+                  <option key={faculty.id} value={faculty.id}>
+                    {faculty.name}
+                  </option>
+                )) || []
+              )}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Кафедра:</label>
+            <select
+              className="styled-select"
+              disabled={!selectedFacultyIdToSpeciality}
+              value={selectedDepartmentIdToSpeciality || ''}
+              onChange={(e) => setSelectedDepartmentIdToSpeciality(parseInt(e.target.value))}
+            >
+              <option value="">Выберите кафедру</option>
+              {selectedFacultyIdToSpeciality && (
+                data.find(u => u.id === selectedUniversityIdToSpeciality)
+                  ?.faculties.find(f => f.id === selectedFacultyIdToSpeciality)
+                  ?.departments.map(department => (
+                    <option key={department.id} value={department.id}>
+                      {department.name}
+                    </option>
+                  )) || []
+              )}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Название специальности:</label>
+            <input
+              type="text"
+              className="input-field"
+              value={newSpecialityName}
+              onChange={(e) => setNewSpecialityName(e.target.value.trim())}
+            />
+          </div>
+
+          <div className="button-container">
+            <button
+              onClick={addSpeciality}
+              disabled={
+                !selectedUniversityIdToSpeciality ||
+                !selectedFacultyIdToSpeciality ||
+                !selectedDepartmentIdToSpeciality ||
+                !newSpecialityName
+              }
+            >
+              Добавить
+            </button>
+            <button
+              onClick={() => setIsAddSpecialityModalOpen(false)}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
       {isAddGroupModalOpen && (
         <div className="modal">
           <h3>Добавить группу</h3>
@@ -480,8 +695,8 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
             <select
               className="styled-select"
               disabled={!selectedFacultyIdToGroup}
-              value={selectedDepartmentId || ''}
-              onChange={(e) => setSelectedDepartmentId(parseInt(e.target.value))}
+              value={selectedDepartmentIdToGroup || ''}
+              onChange={(e) => setSelectedDepartmentIdToGroup(parseInt(e.target.value))}
             >
               <option value="">Выберите кафедру</option>
               {selectedFacultyIdToGroup && (
@@ -490,6 +705,28 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
                   ?.departments.map(department => (
                     <option key={department.id} value={department.id}>
                       {department.name}
+                    </option>
+                  )) || []
+              )}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Специальность:</label>
+            <select
+              className="styled-select"
+              disabled={!selectedDepartmentIdToGroup}
+              value={selectedSpecialityIdToGroup || ''}
+              onChange={(e) => setSelectedSpecialityIdToGroup(parseInt(e.target.value))}
+            >
+              <option value="">Выберите кафедру</option>
+              {selectedDepartmentIdToGroup && (
+                data.find(u => u.id === selectedUniversityIdToGroup)
+                  ?.faculties.find(f => f.id === selectedFacultyIdToGroup)
+                  ?.departments.find(f => f.id === selectedDepartmentIdToGroup)
+                  ?.specialities.map(speciality => (
+                    <option key={speciality.id} value={speciality.id}>
+                      {speciality.name}
                     </option>
                   )) || []
               )}
@@ -533,14 +770,14 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
             />
           </div>
 
-          {/* Кнопки */}
           <div className="button-container">
             <button
               onClick={addGroup}
               disabled={
                 !selectedUniversityIdToGroup ||
                 !selectedFacultyIdToGroup ||
-                !selectedDepartmentId ||
+                !selectedDepartmentIdToGroup ||
+                !selectedSpecialityIdToGroup ||
                 !newGroupName ||
                 !selectedCourse
               }
