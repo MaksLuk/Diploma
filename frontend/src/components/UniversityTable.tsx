@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { UniversityType } from '../types';
 
 const COURSES = [
   { value: 'Бакалавриат, 1', label: 'Бакалавриат, 1' },
@@ -15,7 +16,7 @@ const COURSES = [
 ];
 
 export const UniversityTable = () => {
-  const [data, setData] = useState([
+  const [data, setData] = useState<UniversityType[]>([
     {
       id: 1,
       name: "Московский университет",
