@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { UniversityTable } from './UniversityTable.tsx';
 import { LecturersTable } from './LecturersTable.tsx';
 import { ClassroomsTable } from './ClassroomsTable.tsx';
 import { SubjectsTable } from './SubjectsTable.tsx';
-import { UniversityType, SubjectType } from '../types';
+import { FlowsTable } from './flowsTable.tsx';
+import { UniversityType, SubjectType, FlowType } from '../types';
 
 /// В компоненте описаны все элементы на вкладке "Данные"
 export const DataComponent = () => {
@@ -170,6 +171,26 @@ export const DataComponent = () => {
     { id: 2, name: "Химия" },
     { id: 3, name: "Физика" },
   ]);
+  const [flows, setFlows] = useState<FlowType[]>([
+    { id: 1, groups: ["ПИ-101", "ПИ-102"] },
+    { id: 2, groups: ["ПИ-101", "АЛГ-201", "АЛГ-202"] },
+  ]);
+
+  // Получение все названия групп из университетских данных
+  const groupNames = useMemo(() => {
+    const getAllGroups = (data: UniversityType[]): string[] => {
+      return data.flatMap(university => 
+        university.faculties.flatMap(faculty => 
+          faculty.departments.flatMap(department => 
+            department.specialities.flatMap(speciality => 
+              speciality.groups.map(group => group.name)
+            )
+          )
+        )
+      );
+    };
+    return Array.from(new Set(getAllGroups(universityData)));
+  }, [universityData]);
 
   return (
     <>
@@ -188,6 +209,11 @@ export const DataComponent = () => {
       <SubjectsTable
         data={subjects}
         setData={setSubjects}
+      />
+      <FlowsTable
+        allGroups={groupNames}
+        data={flows}
+        setData={setFlows}
       />
     </>
   );

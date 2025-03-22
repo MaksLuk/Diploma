@@ -53,3 +53,9 @@ export type SubjectType = {
     id: number;
     name: string;
 };
+
+// Потоки
+export type FlowType = {
+    id: number;
+    groups: string[];
+};
