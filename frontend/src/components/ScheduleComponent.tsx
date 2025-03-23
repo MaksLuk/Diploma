@@ -13,10 +13,14 @@ export interface DataProps {
 }
 
 export const ScheduleComponent = ({ universityData }: DataProps) => {
-  const [activeTab, setActiveTab] = useState('');
+  const [activeUniversity, setActiveUniversity] = useState<UniversityType | null>(null);
+  const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
+  const handleTabClick = (university: UniversityType) => {
+    setActiveUniversity(university);
+  };
+  const handleSecondTabClick = (faculty: string) => {
+    setActiveFaculty(faculty);
   };
 
   return (
@@ -24,19 +28,36 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
       <div>
         {universityData.map((university) => (
           <button
-            className={activeTab === university.name ? 'active' : ''}
-            onClick={() => handleTabClick(university.name)}
+            className={activeUniversity?.name === university.name ? 'active' : ''}
+            onClick={() => handleTabClick(university)}
           >
             {university.name}
           </button>
         ))}
       </div>
       <div>
-        {universityData.map((university) => (
-          <div style={{ visibility: activeTab === university.name ? 'visible' : 'hidden', height: activeTab === university.name ? 'auto' : '0' }}>
-            {university.name}
+        <div className="tabs-container">
+          <div>
+            {activeUniversity?.faculties.map((faculty) => (
+              <button
+                className={activeFaculty === faculty.name ? 'active' : ''}
+                onClick={() => handleSecondTabClick(faculty.name)}
+              >
+                {faculty.name}
+              </button>
+              ))}
           </div>
-        ))}
+          {activeUniversity?.faculties.map((faculty) => (
+            <div
+              style={{
+                visibility: activeFaculty === faculty.name ? 'visible' : 'hidden',
+                height: activeFaculty === faculty.name ? 'auto' : '0'
+              }}
+            >
+              {faculty.name}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
