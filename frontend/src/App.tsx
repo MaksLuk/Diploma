@@ -222,7 +222,18 @@ function App() {
             setSyllabusData={setSyllabusData}
           />
         }
-        {activeTab === 'Расписание' && <ScheduleComponent />}
+        {activeTab === 'Расписание' &&
+          <ScheduleComponent
+            universityData={universityData}
+            setUniversityData={setUniversityData}
+            subjects={subjects}
+            setSubjects={setSubjects}
+            flows={flows}
+            setFlows={setFlows}
+            syllabusData={syllabusData}
+            setSyllabusData={setSyllabusData}
+          />
+        }
       </div>
     </div>
   );
