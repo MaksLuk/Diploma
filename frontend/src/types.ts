@@ -68,4 +68,6 @@ export type SyllabusType = {
     groups: string[];   // Список групп
     hours: number;  // Число часов за семестр
     attestation: string;    // Вид аттестации
+    lecturer: string; // ФИО преподавателя
+    secondLecturer?: string; // ФИО второго преподавателя
 };

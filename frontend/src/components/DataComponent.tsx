@@ -183,7 +183,8 @@ export const DataComponent = () => {
       subject: "Биология",
       groups: ["ПИ-101", "ПИ-102"],
       hours: 144,
-      attestation: "Зачёт"
+      attestation: "Зачёт",
+      lecturer: "Иванов И.И.",
     }
   ]);
 
@@ -201,6 +202,19 @@ export const DataComponent = () => {
       );
     };
     return Array.from(new Set(getAllGroups(universityData)));
+  }, [universityData]);
+  // Все преподаватели
+  const allLecturers = useMemo<string[]>(() => {
+    const getAllLecturers = (data: UniversityType[]): string[] => {
+      return data.flatMap(university => 
+        university.faculties.flatMap(faculty => 
+          faculty.departments.flatMap(department => 
+            department.lecturers.map(lecturer => lecturer.fullName)
+          )
+        )
+      );
+    };
+    return Array.from(new Set(getAllLecturers(universityData)));
   }, [universityData]);
 
   return (
@@ -232,6 +246,7 @@ export const DataComponent = () => {
         subjects={subjects}
         allGroups={groupNames}
         flows={flows}
+        lecturers={allLecturers}
       />
     </>
   );

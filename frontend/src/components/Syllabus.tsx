@@ -13,13 +13,16 @@ interface SyllabusProps {
   subjects: SubjectType[],
   allGroups: string[],
   flows: FlowType[],
+  lecturers: string[],
 }
 
-export const Syllabus = ({ data, setData, subjects, allGroups, flows }: SyllabusProps) => {
+export const Syllabus = ({ data, setData, subjects, allGroups, flows, lecturers }: SyllabusProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedHours, setSelectedHours] = useState(0);
   const [selectedAttestation, setSelectedAttestation] = useState("");
+  const [selectedLecturer, setSelectedLecturer] = useState<string>("");
+  const [selectedSecondLecturer, setSelectedSecondLecturer] = useState<string | null>(null);
 
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -70,6 +73,8 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows }: Syllabus
         groups: selectedGroups,
         hours: selectedHours,
         attestation: selectedAttestation,
+        lecturer: selectedLecturer,
+        secondLecturer: selectedSecondLecturer? selectedSecondLecturer : undefined,
       }
     ]);
     setSelectedGroups([]);
@@ -80,6 +85,8 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows }: Syllabus
     setSelectedFlow(null);
     setInputValue('');
     setShowSuggestions(false);
+    setSelectedLecturer("");
+    setSelectedSecondLecturer(null);
   };
 
   return (
@@ -92,6 +99,7 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows }: Syllabus
           <th>Группы</th>
           <th>Часы</th>
           <th>Вид аттестации</th>
+          <th>Преподаватели</th>
         </tr>
       </thead>
       <tbody>
@@ -102,6 +110,7 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows }: Syllabus
               <td>{syllabus.groups.join(", ")}</td>
               <td>{syllabus.hours}</td>
               <td>{syllabus.attestation}</td>
+              <td>{syllabus.secondLecturer? syllabus.lecturer + ', ' + syllabus.secondLecturer : syllabus.lecturer}</td>
             </tr>
           </React.Fragment>
         ))}
@@ -290,9 +299,67 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows }: Syllabus
               </option>
             ))}
           </select>
+          <div className="form-group">
+            <label htmlFor="firstLecturer">Преподаватель:</label>
+            <input
+              id="firstLecturer"
+              type="text"
+              value={selectedLecturer}
+              onChange={(e) => setSelectedLecturer(e.target.value)}
+              list="lecturers"
+              placeholder="Выберите преподавателя"
+              style={{
+                padding: '8px',
+                width: '300px',
+                marginRight: '8px',
+                border: '1px solid #ccc'
+              }}
+              className="form-control"
+            />
+            <datalist id="lecturers">
+              {lecturers.map(lecturer => (
+                <option key={lecturer} value={lecturer} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="form-group" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+            <label htmlFor="firstLecturer">
+              Второй преподаватель (необязательно):
+            </label>
+            <input
+              type="text"
+              value={selectedSecondLecturer || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedSecondLecturer(value === '' ? null : value);
+              }}
+              list="secondLecturers"
+              placeholder="Выберите преподавателя"
+              style={{
+                padding: '8px',
+                width: '300px',
+                marginRight: '8px',
+                border: '1px solid #ccc'
+              }}
+              className="form-control"
+            />
+            <datalist id="secondLecturers">
+              {lecturers.map(lecturer => (
+                <option key={lecturer} value={lecturer} />
+              ))}
+            </datalist>
+          </div>
           <button
             onClick={handleAddSyllabus}
-            disabled={!selectedSubject || !selectedHours || !selectedAttestation}
+            disabled={
+              !selectedSubject ||
+              !selectedHours ||
+              !selectedAttestation ||
+              !lecturers.includes(selectedLecturer) ||
+              (selectedSecondLecturer !== null && !lecturers.includes(selectedSecondLecturer)) ||
+              selectedSecondLecturer === selectedLecturer
+            }
           >
             Добавить
           </button>
