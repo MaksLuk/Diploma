@@ -18,6 +18,7 @@ function App() {
             {
               id: 1,
               name: "Кафедра программирования",
+              shortName: "КП",
               specialities: [
                 {
                   id: 1,
@@ -60,6 +61,7 @@ function App() {
             {
               id: 2,
               name: "Кафедра алгебры",
+              shortName: "КА",
               specialities: [
                 {
                   id: 1,
@@ -102,6 +104,7 @@ function App() {
             {
               id: 3,
               name: "Кафедра теоретической физики",
+              shortName: "КТФ",
               specialities: [
                 {
                   id: 1,
@@ -135,6 +138,7 @@ function App() {
             {
               id: 4,
               name: "Кафедра органической химии",
+              shortName: "КОФ",
               specialities: [
                 {
                   id: 1,

@@ -29,6 +29,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
   const [selectedUniversityIdToDepartment, setSelectedUniversityIdToDepartment] = useState<number|null>(null);
   const [selectedFacultyIdToDepartment, setSelectedFacultyIdToDepartment] = useState<number|null>(null);
   const [newDepartmentName, setNewDepartmentName] = useState('');
+  const [newDepartmentShortName, setNewDepartmentShortName] = useState('');
   // Добавление специальности
   const [isAddSpecialityModalOpen, setIsAddSpecialityModalOpen] = useState(false);
   const [selectedUniversityIdToSpeciality, setSelectedUniversityIdToSpeciality] = useState<number|null>(null);
@@ -129,7 +130,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
   };
   
   const addDepartment = () => {
-    if (!selectedUniversityIdToDepartment || !selectedFacultyIdToDepartment || !newDepartmentName) return;
+    if (!selectedUniversityIdToDepartment || !selectedFacultyIdToDepartment || !newDepartmentName || !newDepartmentShortName) return;
 
     // Находим выбранный факультет
     const selectedUniversity = data.find(u => u.id === selectedUniversityIdToDepartment);
@@ -156,6 +157,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
                   {
                     id: newId,
                     name: newDepartmentName,
+                    shortName: newDepartmentShortName,
                     specialities: [],
                     lecturers: [],
                     classrooms: []
@@ -175,6 +177,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedUniversityIdToDepartment(null);
     setSelectedUniversityIdToDepartment(null);
     setNewDepartmentName('');
+    setNewDepartmentShortName('');
   };
 
   const addSpeciality = () => {
@@ -537,13 +540,24 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
             />
           </div>
 
+          <div className="form-group">
+            <label>Сокращённое название:</label>
+            <input
+              type="text"
+              className="input-field"
+              value={newDepartmentShortName}
+              onChange={(e) => setNewDepartmentShortName(e.target.value)}
+            />
+          </div>
+
           <div className="button-container">
             <button
               onClick={addDepartment}
               disabled={
                 !selectedUniversityIdToDepartment ||
                 !selectedFacultyIdToDepartment ||
-                !newDepartmentName
+                !newDepartmentName ||
+                !newDepartmentShortName
               }
             >
               Добавить

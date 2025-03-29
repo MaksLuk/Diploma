@@ -70,10 +70,10 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
                       </button>
                       {faculty.departments.map((department) => (
                         <button
-                          className={activeDepartment === department.name ? 'active' : ''}
-                          onClick={() => handleThirdTabClick(department.name)}
+                          className={activeDepartment === department.shortName ? 'active' : ''}
+                          onClick={() => handleThirdTabClick(department.shortName)}
                         >
-                          {department.name}
+                          {department.shortName}
                         </button>
                       ))}
                     </React.Fragment>
