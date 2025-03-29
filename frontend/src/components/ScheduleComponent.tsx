@@ -13,11 +13,11 @@ export interface DataProps {
 }
 
 export const ScheduleComponent = ({ universityData }: DataProps) => {
-  const [activeUniversity, setActiveUniversity] = useState<UniversityType | null>(null);
+  const [activeUniversity, setActiveUniversity] = useState<string | null>(null);
   const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
   const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
 
-  const handleTabClick = (university: UniversityType) => {
+  const handleTabClick = (university: string) => {
     setActiveUniversity(university);
   };
   const handleSecondTabClick = (faculty: string) => {
@@ -32,8 +32,8 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
       <div>
         {universityData.map((university) => (
           <button
-            className={activeUniversity?.name === university.name ? 'active' : ''}
-            onClick={() => handleTabClick(university)}
+            className={activeUniversity === university.name ? 'active' : ''}
+            onClick={() => handleTabClick(university.name)}
           >
             {university.name}
           </button>
@@ -41,46 +41,51 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
       </div>
       <div>
         <div className="tabs-container">
-          <div>
-            {activeUniversity?.faculties.map((faculty) => (
-              <button
-                className={activeFaculty === faculty.name ? 'active' : ''}
-                onClick={() => handleSecondTabClick(faculty.name)}
-              >
-                {faculty.name}
-              </button>
-              ))}
-          </div>
-          {activeUniversity?.faculties.map((faculty) => (
-            <div
-              style={{
-                visibility: activeFaculty === faculty.name ? 'visible' : 'hidden',
-                height: activeFaculty === faculty.name ? 'auto' : '0'
-              }}
-            >
+          {universityData.map((university) => (
+            (university.name === activeUniversity) &&
+            <React.Fragment key={university.id}>
               <div>
-                {activeUniversity?.faculties.map((faculty) => (
-                  (activeFaculty === faculty.name) ? (
-                    <React.Fragment key={faculty.id}>
-                      <button
-                        className={activeDepartment === 'all' ? 'active' : ''}
-                        onClick={() => handleThirdTabClick('all')}
-                      >
-                        Все
-                      </button>
-                      {faculty.departments.map((department) => (
-                        <button
-                          className={activeDepartment === department.shortName ? 'active' : ''}
-                          onClick={() => handleThirdTabClick(department.shortName)}
-                        >
-                          {department.shortName}
-                        </button>
-                      ))}
-                    </React.Fragment>
-                  ) : null
+                {university.faculties.map((faculty) => (
+                  <button
+                    className={activeFaculty === faculty.name ? 'active' : ''}
+                    onClick={() => handleSecondTabClick(faculty.name)}
+                  >
+                    {faculty.name}
+                  </button>
                   ))}
               </div>
-            </div>
+              {university.faculties.map((faculty) => (
+                <div
+                  style={{
+                    visibility: activeFaculty === faculty.name ? 'visible' : 'hidden',
+                    height: activeFaculty === faculty.name ? 'auto' : '0'
+                  }}
+                >
+                  <div>
+                    {university.faculties.map((faculty) => (
+                      (activeFaculty === faculty.name) ? (
+                        <React.Fragment key={faculty.id}>
+                          <button
+                            className={activeDepartment === 'all' ? 'active' : ''}
+                            onClick={() => handleThirdTabClick('all')}
+                          >
+                            Все
+                          </button>
+                          {faculty.departments.map((department) => (
+                            <button
+                              className={activeDepartment === department.shortName ? 'active' : ''}
+                              onClick={() => handleThirdTabClick(department.shortName)}
+                            >
+                              {department.shortName}
+                            </button>
+                          ))}
+                        </React.Fragment>
+                      ) : null
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </React.Fragment>
           ))}
         </div>
       </div>
