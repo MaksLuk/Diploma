@@ -15,12 +15,16 @@ export interface DataProps {
 export const ScheduleComponent = ({ universityData }: DataProps) => {
   const [activeUniversity, setActiveUniversity] = useState<UniversityType | null>(null);
   const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
+  const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
 
   const handleTabClick = (university: UniversityType) => {
     setActiveUniversity(university);
   };
   const handleSecondTabClick = (faculty: string) => {
     setActiveFaculty(faculty);
+  };
+  const handleThirdTabClick = (department: string) => {
+    setActiveDepartment(department);
   };
 
   return (
@@ -54,7 +58,28 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
                 height: activeFaculty === faculty.name ? 'auto' : '0'
               }}
             >
-              {faculty.name}
+              <div>
+                {activeUniversity?.faculties.map((faculty) => (
+                  (activeFaculty === faculty.name) ? (
+                    <React.Fragment key={faculty.id}>
+                      <button
+                        className={activeDepartment === 'all' ? 'active' : ''}
+                        onClick={() => handleThirdTabClick('all')}
+                      >
+                        Все
+                      </button>
+                      {faculty.departments.map((department) => (
+                        <button
+                          className={activeDepartment === department.name ? 'active' : ''}
+                          onClick={() => handleThirdTabClick(department.name)}
+                        >
+                          {department.name}
+                        </button>
+                      ))}
+                    </React.Fragment>
+                  ) : null
+                  ))}
+              </div>
             </div>
           ))}
         </div>
