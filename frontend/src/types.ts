@@ -8,7 +8,7 @@ type LecturerType = {
     fullName: string;
 };
   
-type GroupType = {
+export type GroupType = {
     id: number;
     name: string;
     course: string;
