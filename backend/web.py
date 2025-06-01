@@ -4,9 +4,6 @@
 
 '''Модуль отвечает за определение методов веб-API'''
 
-import uuid
-from datetime import datetime
-
 from typing import Tuple, Optional
 
 import uvicorn
@@ -14,7 +11,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from db.main_db import Database, CourseEnum, LessonType, UniversityData
+from db.main_db import Database, CourseEnum, LessonType
 
 
 ListenParams = Tuple[str, int]

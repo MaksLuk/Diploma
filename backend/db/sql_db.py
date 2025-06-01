@@ -8,8 +8,9 @@ from typing import List, Optional
 from collections import defaultdict
 
 from sqlmodel import (
-    Field, SQLModel, create_engine, Session, select, Relationship, aliased
+  Field, SQLModel, create_engine, Session, select, Relationship, CheckConstraint
 )
+from sqlalchemy.orm import aliased
 
 from db.main_db import (
     Database, LessonType, CourseEnum, UniversityData, DepartmentData, GroupData,
@@ -97,9 +98,13 @@ class Teacher(SQLModel, table=True):
 
 class Curriculum(SQLModel, table=True):
     """Учебный план"""
+    __table_args__ = (
+        CheckConstraint("hours IN (72, 108, 144)", name="hours_check"),
+    )
+
     id: Optional[int] = Field(default=None, primary_key=True)
     subject_id: int = Field(foreign_key="subject.id")
-    hours: int = Field(sa_column_args={"check": "hours IN (72, 108, 144)"})
+    hours: int
     primary_teacher_id: int = Field(foreign_key="teacher.id")
     secondary_teacher_id: Optional[int] = Field(foreign_key="teacher.id")
     group_id: Optional[int] = Field(default=None, foreign_key="group.id")
@@ -114,10 +119,16 @@ class Curriculum(SQLModel, table=True):
 
 class Lesson(SQLModel, table=True):
     """Занятие в расписании"""
+    __table_args__ = (
+        CheckConstraint("week IN (1, 2)", name="week_check"),
+        CheckConstraint("day BETWEEN 1 AND 6", name="day_check"),
+        CheckConstraint("pair BETWEEN 1 AND 8", name="pair_check"),
+    )
+
     id: Optional[int] = Field(default=None, primary_key=True)
-    week: int = Field(sa_column_args={"check": "week IN (1, 2)"})
-    day: int = Field(sa_column_args={"check": "day BETWEEN 1 AND 6"})
-    pair: int = Field(sa_column_args={"check": "pair BETWEEN 1 AND 8"})
+    week: int
+    day: int
+    pair: int
     classroom_id: int = Field(foreign_key="classroom.id")
     curriculum_id: int = Field(foreign_key="curriculum.id")
     lesson_type: LessonType

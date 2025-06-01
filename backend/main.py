@@ -21,3 +21,6 @@ def main() -> int:
     db = get_database('sqlite:///test_schedule.sqlite')
     web_app = WebApp(db, (LISTEN_HOST, DEFAULT_LISTEN_PORT))
     web_app.serve()
+
+if __name__ == '__main__':
+    main()
