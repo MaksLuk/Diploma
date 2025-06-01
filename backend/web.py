@@ -72,7 +72,7 @@ class WebApp:
         name: str,
         short_name: Optional[str] = None,
         parent_id: Optional[int] = None
-    ) -> None:
+    ) -> int:
         '''Добавляет структурное подразделение. Если родительского подразделения
         не существует или подразделеие с таким названием уже есть -
         возвращает ошибку 404'''
@@ -85,7 +85,7 @@ class WebApp:
         self,
         department_id: int,
         name: str
-    ) -> None:
+    ) -> int:
         '''Добавляет специальность. Если родительского подразделения
         не существует или специальность с таким названием уже есть -
         возвращает ошибку 404'''
@@ -100,7 +100,7 @@ class WebApp:
         name: str,
         course: CourseEnum,
         student_count: int
-    ) -> None:
+    ) -> int:
         '''Добавляет группу. Если специальности не существует или группа с таким
         именем уже есть - возвращает ошибку 404'''
         try:
@@ -112,7 +112,7 @@ class WebApp:
         self,
         department_id: int,
         name: str
-    ) -> None:
+    ) -> int:
         '''Добавляет преподавателя. Если родительской кафедры не существует или
         преподаватель с таким ФИО уже есть - возвращает ошибку 404'''
         try:
@@ -126,7 +126,7 @@ class WebApp:
         department_id: Optional[int],
         name: str,
         capacity: int
-    ) -> None:
+    ) -> int:
         '''Добавляет аудиторию. Если родительского факультета, кафедры не
         существует или аудитория с таким номером уже есть -
         возвращает ошибку 404'''
@@ -141,7 +141,7 @@ class WebApp:
         self,
         name: str,
         short_name: str
-    ) -> None:
+    ) -> int:
         '''Добавляет предмет. Если предмет с таким названием уже есть -
         возвращает ошибку 404. Сокращённое название может быть неуникально'''
         try:
@@ -149,7 +149,7 @@ class WebApp:
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
 
-    def add_flow(self, groups: list[str]) -> None:
+    def add_flow(self, groups: list[str]) -> int:
         '''Добавляет поток (список групп). Если в потоке есть несуществующие
         группы - возвращает ошибку 404'''
         try:
@@ -165,7 +165,7 @@ class WebApp:
         secondary_teacher_id: Optional[int] = None,
         group_id: Optional[int] = None,
         flow_id: Optional[int] = None
-    ) -> None:
+    ) -> int:
         '''Добавляет занятие в учебный план.
         Возвращает ошибку 404 если:
         
@@ -190,7 +190,7 @@ class WebApp:
         classroom_id: int,
         curriculum_id: int,
         lesson_type: LessonType
-    ) -> None:
+    ) -> int:
         '''Добавляет ячейку расписания. Если аудитории или занятия из учебного
         плана не существует либо параметр не корректен - возвращает ошибку 404.
 

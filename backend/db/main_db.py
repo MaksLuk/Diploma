@@ -6,7 +6,7 @@
 
 import abc
 from enum import Enum
-from typing import Optional
+from typing import Optional 
 
 from pydantic import BaseModel
 
@@ -129,20 +129,17 @@ class Database(abc.ABC):
         self,
         parent_id: Optional[int],
         name: str
-    ) -> None:
-        '''
-        Добавляет структурное подразделение (университет, факультет, кафедру)
-        '''
+    ) -> int:
+        '''Добавляет структурное подразделение (университет, факультет, кафедру)
+        Возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_speciality(
         self,
         department_id: int,
         name: str
-    ) -> None:
-        '''
-        Добавляет специальность
-        '''
+    ) -> int:
+        '''Добавляет специальность, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_group(
@@ -151,20 +148,16 @@ class Database(abc.ABC):
         name: str,
         course: CourseEnum,
         student_count: int
-    ) -> None:
-        '''
-        Добавляет группу
-        '''
+    ) -> int:
+        '''Добавляет группу, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_teacher(
         self,
         department_id: int,
         name: str
-    ) -> None:
-        '''
-        Добавляет преподавателя
-        '''
+    ) -> int:
+        '''Добавляет преподавателя, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_classroom(
@@ -173,26 +166,20 @@ class Database(abc.ABC):
         department_id: Optional[int],
         name: str,
         capacity: int
-    ) -> None:
-        '''
-        Добавляет аудиторию
-        '''
+    ) -> int:
+        '''Добавляет аудиторию, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_subject(
         self,
         name: str,
         short_name: str
-    ) -> None:
-        '''
-        Добавляет аудиторию
-        '''
+    ) -> int:
+        '''Добавляет аудиторию, возвращает id добавленной записи'''
 
     @abc.abstractmethod
-    def add_flow(self, groups: list[str]) -> None:
-        '''
-        Добавляет поток
-        '''
+    def add_flow(self, groups: list[str]) -> int:
+        '''Добавляет поток, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_lesson_to_plan(
@@ -203,10 +190,8 @@ class Database(abc.ABC):
         secondary_teacher_id: int,
         group_id: Optional[int],
         flow_id: Optional[int]
-    ) -> None:
-        '''
-        Добавляет занятие в учебный план
-        '''
+    ) -> int:
+        '''Добавляет занятие в учебный план, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def add_lesson_to_schedule(
@@ -217,10 +202,8 @@ class Database(abc.ABC):
         classroom_id: int,
         curriculum_id: int,
         lesson_type: LessonType
-    ) -> None:
-        '''
-        Добавляет занятие в расписание
-        '''
+    ) -> int:
+        '''Добавляет занятие в расписание, возвращает id добавленной записи'''
 
     @abc.abstractmethod
     def get_university_data(self) -> list[UniversityData]:

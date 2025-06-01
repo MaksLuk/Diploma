@@ -165,7 +165,7 @@ class SQLDatabase(Database):
         parent_id: Optional[int],
         name: str,
         short_name: Optional[str]
-    ) -> None:
+    ) -> int:
         new_division = Department(
             name=name, parent_id=parent_id, short_name=short_name
         )
@@ -188,12 +188,14 @@ class SQLDatabase(Database):
 
             session.add(new_division)
             session.commit()
+            session.refresh(new_division)
+        return new_division.id
 
     def add_speciality(
         self,
         department_id: int,
         name: str
-    ) -> None:
+    ) -> int:
         new_speciality = Specialty(name=name, department_id=department_id)
         with Session(self.engine) as session:
             # Проверка существования "родительской" кафедры
@@ -209,6 +211,8 @@ class SQLDatabase(Database):
 
             session.add(new_speciality)
             session.commit()
+            session.refresh(new_speciality)
+        return new_speciality.id
 
     def add_group(
         self,
@@ -216,7 +220,7 @@ class SQLDatabase(Database):
         name: str,
         course: CourseEnum,
         student_count: int
-    ) -> None:
+    ) -> int:
         new_group = Group(
             name=name,
             course=course,
@@ -237,12 +241,14 @@ class SQLDatabase(Database):
             # Сюда можно добавить проверку наличия в группе минимально необходимого числа студентов
             session.add(new_group)
             session.commit()
+            session.refresh(new_group)
+        return new_group.id
 
     def add_teacher(
         self,
         department_id: int,
         name: str
-    ) -> None:
+    ) -> int:
         new_teacher = Teacher(name=name, department_id=department_id)
         with Session(self.engine) as session:
             # Проверка существования "родительской" кафедры
@@ -258,6 +264,8 @@ class SQLDatabase(Database):
 
             session.add(new_teacher)
             session.commit()
+            session.refresh(new_teacher)
+        return new_teacher.id
 
     def add_classroom(
         self,
@@ -265,7 +273,7 @@ class SQLDatabase(Database):
         department_id: Optional[int],
         name: str,
         capacity: int
-    ) -> None:
+    ) -> int:
         new_classroom = Classroom(
             name=name,
             capacity=capacity,
@@ -290,12 +298,14 @@ class SQLDatabase(Database):
 
             session.add(new_classroom)
             session.commit()
+            session.refresh(new_classroom)
+        return new_classroom.id
 
     def add_subject(
         self,
         name: str,
         short_name: str
-    ) -> None:
+    ) -> int:
         new_subject = Subject(name=name, short_name=short_name)
         with Session(self.engine) as session:
             # Проверка уникальности полного названия
@@ -307,8 +317,10 @@ class SQLDatabase(Database):
 
             session.add(new_subject)
             session.commit()
+            session.refresh(new_subject)
+        return new_subject.id
 
-    def add_flow(self, groups: list[str]) -> None:
+    def add_flow(self, groups: list[str]) -> int:
         with Session(self.engine) as session:
             # Проверка существования всех групп
             missing_groups = []
@@ -337,6 +349,8 @@ class SQLDatabase(Database):
                 link = FlowGroupLink(flow_id=new_flow.id, group_id=group.id)
                 session.add(link)
             session.commit()
+            session.refresh(new_flow)
+            return new_flow.id
 
     def add_lesson_to_plan(
         self,
@@ -346,7 +360,7 @@ class SQLDatabase(Database):
         secondary_teacher_id: Optional[int],
         group_id: Optional[int],
         flow_id: Optional[int]
-    ) -> None:
+    ) -> int:
         new_lesson = Curriculum(
             subject_id=subject_id,
             hours=hours,
@@ -395,6 +409,8 @@ class SQLDatabase(Database):
 
             session.add(new_lesson)
             session.commit()
+            session.refresh(new_lesson)
+        return new_lesson.id
 
     def add_lesson_to_schedule(
         self,
@@ -404,7 +420,7 @@ class SQLDatabase(Database):
         classroom_id: int,
         curriculum_id: int,
         lesson_type: LessonType
-    ) -> None:
+    ) -> int:
         new_lesson = Lesson(
             week=week,
             day=day,
@@ -432,6 +448,8 @@ class SQLDatabase(Database):
 
             session.add(new_lesson)
             session.commit()
+            session.refresh(new_lesson)
+        return new_lesson.id
 
     def get_university_data(self) -> list[UniversityData]:
         with Session(self.engine) as session:
