@@ -68,7 +68,6 @@ export type CurriculumType = {
     subject: string;    // Идентификация предмета по полному имени
     groups: string[];   // Список групп
     hours: number;  // Число часов за семестр
-    attestation: string;    // Вид аттестации
-    lecturer: string; // ФИО преподавателя
-    secondLecturer?: string; // ФИО второго преподавателя
+    primary_teacher: string; // ФИО преподавателя
+    secondary_teacher?: string; // ФИО второго преподавателя
 };

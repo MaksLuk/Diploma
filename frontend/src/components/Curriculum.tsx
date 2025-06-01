@@ -56,9 +56,8 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
         subject: selectedSubject,
         groups: selectedGroups,
         hours: selectedHours,
-        attestation: selectedAttestation,
-        lecturer: selectedLecturer,
-        secondLecturer: selectedSecondLecturer? selectedSecondLecturer : undefined,
+        primary_teacher: selectedLecturer,
+        secondary_teacher: selectedSecondLecturer? selectedSecondLecturer : undefined,
       }
     ]);
     setIsModalOpen(false);
@@ -79,7 +78,6 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
           <th>Предмет</th>
           <th>Группы</th>
           <th>Часы</th>
-          <th>Вид аттестации</th>
           <th>Преподаватели</th>
         </tr>
       </thead>
@@ -90,8 +88,7 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
               <td>{Curriculum.subject}</td>
               <td>{Curriculum.groups.join(", ")}</td>
               <td>{Curriculum.hours}</td>
-              <td>{Curriculum.attestation}</td>
-              <td>{Curriculum.secondLecturer? Curriculum.lecturer + ', ' + Curriculum.secondLecturer : Curriculum.lecturer}</td>
+              <td>{Curriculum.secondary_teacher? Curriculum.primary_teacher + ', ' + Curriculum.secondary_teacher : Curriculum.primary_teacher}</td>
             </tr>
           </React.Fragment>
         ))}
@@ -163,18 +160,7 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
               </option>
             ))}
           </select>
-          <select
-            className="styled-select"
-            value={selectedAttestation}
-            onChange={(e) => setSelectedAttestation(e.target.value)}
-          >
-            <option value="">Выберите вид аттестации</option>
-            {ATTESTATIONS.map(attestation => (
-              <option key={attestation} value={attestation}>
-                {attestation}
-              </option>
-            ))}
-          </select>
+
           <div className="form-group">
             <label htmlFor="firstLecturer">Преподаватель:</label>
             <input
