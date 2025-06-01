@@ -5,7 +5,7 @@ import { ClassroomsTable } from './ClassroomsTable.tsx';
 import { SubjectsTable } from './SubjectsTable.tsx';
 import { FlowsTable } from './flowsTable.tsx';
 import { Curriculum } from './Curriculum.tsx';
-import { UniversityType, SubjectType, FlowType, CurriculumType } from '../types';
+import { UniversityType, SubjectType, FlowType, CurriculumType, LecturerType, GroupType } from '../types';
 
 export interface DataProps {
   universityData: UniversityType[];
@@ -40,14 +40,25 @@ export const DataComponent = ({
     };
     return Array.from(new Set(getAllGroups(universityData)));
   }, [universityData]);
-  // Все преподаватели
-  const allLecturers = useMemo<string[]>(() => {
-    const getAllLecturers = (data: UniversityType[]): string[] => {
+  //
+  const allGroups = useMemo<GroupType[]>(() => {
+    const getAllGroups = (data: UniversityType[]): GroupType[] => {
       return data.flatMap(university => 
         university.faculties.flatMap(faculty => 
           faculty.departments.flatMap(department => 
-            department.lecturers.map(lecturer => lecturer.fullName)
+            department.specialities.flatMap(speciality => speciality.groups)
           )
+        )
+      );
+    };
+    return Array.from(new Set(getAllGroups(universityData)));
+  }, [universityData]);
+  // Все преподаватели
+  const allLecturers = useMemo<LecturerType[] >(() => {
+    const getAllLecturers = (data: UniversityType[]): LecturerType[]  => {
+      return data.flatMap(university => 
+        university.faculties.flatMap(faculty => 
+          faculty.departments.flatMap(department => department.lecturers)
         )
       );
     };
@@ -81,7 +92,7 @@ export const DataComponent = ({
         data={CurriculumData}
         setData={setCurriculumData}
         subjects={subjects}
-        allGroups={groupNames}
+        allGroups={allGroups}
         flows={flows}
         lecturers={allLecturers}
       />

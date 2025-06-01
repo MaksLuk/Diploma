@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FlowType } from '../types';
+import { createFlow } from '../api';
 
 export interface FlowsTableProps {
   allGroups: string[];
@@ -37,10 +38,8 @@ export const FlowsTable = ({ allGroups, data, setData }: FlowsTableProps) => {
     setFlows(prevFlows => prevFlows.filter((_, i) => i !== index));
   };
 
-  const addFlow = () => {
-    const newId = data.length > 0
-      ? Math.max(...data.map(g => g.id)) + 1
-      : 1;
+  const addFlow = async () => {
+    const newId = await createFlow(flows);
     setData([...data, { id: newId, groups: flows }]);
     setFlows([]);
     setInputValue('');

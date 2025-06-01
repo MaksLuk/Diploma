@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UniversityTableProps } from '../types';
+import { createClassroom } from '../api';
 
 export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
   const [IsAddClassroomModalOpen, setIsAddClassroomModalOpen] = useState(false);
@@ -7,6 +8,7 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
   const [selectedFacultyIdToClassroom, setSelectedFacultyIdToClassroom] = useState<number|null>(null);
   const [selectedDepartmentIdToClassroom, setSelectedDepartmentIdToClassroom] = useState<number|null>(null);
   const [newClassroomNumber, setNewClassroomNumber] = useState("");
+  const [newClassroomCapacity, setNewClassroomCapacity] = useState(15);
 
   useEffect(() => {
     setSelectedFacultyIdToClassroom(null);
@@ -17,7 +19,7 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedDepartmentIdToClassroom(null);
   }, [selectedFacultyIdToClassroom]);
 
-  const addClassroom = () => {
+  const addClassroom = async () => {
     if (
       !selectedUniversityIdToClassroom ||
       !selectedFacultyIdToClassroom ||
@@ -30,9 +32,11 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
     if (selectedDepartmentIdToClassroom === null) {
       // Если кафедра не выбрана - аудитория принадлежит всему факультету
       if (!selectedFaculty) return;
-      const newId = selectedFaculty.classrooms.length > 0
-        ? Math.max(...selectedFaculty.classrooms.map(g => g.id)) + 1
-        : 1;
+      const newId = await createClassroom(
+        selectedFacultyIdToClassroom,
+        newClassroomNumber,
+        newClassroomCapacity
+      );
       setData(prevData => prevData.map(university => {
         if (university.id === selectedUniversityIdToClassroom) {
           return {
@@ -57,9 +61,12 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
       // Если кафедра выбрана - добавляем аудиторию к кафедре
       const selectedDepartment = selectedFaculty?.departments.find(d => d.id === selectedDepartmentIdToClassroom);
       if (!selectedDepartment) return;
-      const newId = selectedDepartment.classrooms.length > 0
-        ? Math.max(...selectedDepartment.classrooms.map(g => g.id)) + 1
-        : 1;
+      const newId = await createClassroom(
+        selectedFacultyIdToClassroom,
+        newClassroomNumber,
+        newClassroomCapacity,
+        selectedDepartmentIdToClassroom
+      );
         setData(prevData => prevData.map(university => {
           if (university.id === selectedUniversityIdToClassroom) {
             return {
@@ -95,6 +102,7 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedFacultyIdToClassroom(null);
     setSelectedDepartmentIdToClassroom(null);
     setNewClassroomNumber("");
+    setNewClassroomCapacity(15);
   };
 
   return (
@@ -212,6 +220,17 @@ export const ClassroomsTable = ({ data, setData }: UniversityTableProps) => {
               className="input-field"
               value={newClassroomNumber}
               onChange={(e) => setNewClassroomNumber(e.target.value.trim())}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Вместимость:</label>
+            <input
+              type="number"
+              className="input-field"
+              value={newClassroomCapacity}
+              min="15"
+              onChange={(e) => setNewClassroomCapacity(parseInt(e.target.value))}
             />
           </div>
 

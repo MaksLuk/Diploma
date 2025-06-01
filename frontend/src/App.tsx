@@ -17,6 +17,7 @@ function App() {
   useEffect(() => {
     const loadData = async () => {
       const universetyData = await fetchUniversityData();
+      console.log(universetyData);
       setUniversityData(universetyData);
       const subjectsData = await fetchSubjects();
       setSubjects(subjectsData);

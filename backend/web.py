@@ -123,9 +123,9 @@ class WebApp:
     def add_classroom(
         self,
         faculty_id: int,
-        department_id: Optional[int],
         name: str,
-        capacity: int
+        capacity: int,
+        department_id: Optional[int] = None
     ) -> int:
         '''Добавляет аудиторию. Если родительского факультета, кафедры не
         существует или аудитория с таким номером уже есть -

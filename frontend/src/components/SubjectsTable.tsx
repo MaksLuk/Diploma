@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SubjectType } from '../types';
+import { createSubject } from '../api';
 
 export interface SubjectsTableProps {
   data: SubjectType[];
@@ -11,17 +12,14 @@ export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newSubjectShortName, setNewSubjectShortName] = useState("");
 
-  const addSubject = () => {
-    const currentId = 
-      data.length > 0 
-        ? Math.max(...data.map(f => f.id)) + 1
-        : 1;
+  const addSubject = async () => {
+    const newId = await createSubject(newSubjectName, newSubjectShortName);
     setData(prevData => [
       ...prevData,
       {
-        id: currentId,
+        id: newId,
         name: newSubjectName,
-        shortName: newSubjectShortName,
+        short_name: newSubjectShortName,
       }
     ]);
     setIsModalOpen(false);
@@ -44,7 +42,7 @@ export const SubjectsTable = ({ data, setData }: SubjectsTableProps) => {
           <React.Fragment key={subject.id}>
             <tr>
               <td>{subject.name}</td>
-              <td>{subject.shortName}</td>
+              <td>{subject.short_name}</td>
             </tr>
           </React.Fragment>
         ))}

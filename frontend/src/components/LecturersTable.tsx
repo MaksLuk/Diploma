@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UniversityTableProps } from '../types';
+import { createTeacher } from '../api';
 
 export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
   const [isAddLecturerModalOpen, setIsAddLecturerModalOpen] = useState(false);
@@ -17,7 +18,7 @@ export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedDepartmentIdToLecturer(null);
   }, [selectedFacultyIdToLecturer]);
 
-  const addLecturer = () => {
+  const addLecturer = async () => {
     if (
       !selectedUniversityIdToLecturer ||
       !selectedFacultyIdToLecturer ||
@@ -30,10 +31,7 @@ export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
     const selectedDepartment = selectedFaculty?.departments.find(d => d.id === selectedDepartmentIdToLecturer);
     if (!selectedDepartment) return;
 
-    const newId = selectedDepartment.lecturers.length > 0
-      ? Math.max(...selectedDepartment.lecturers.map(g => g.id)) + 1
-      : 1;
-
+    const newId = await createTeacher(selectedDepartment.id, newLecturerName);
     setData(prevData => prevData.map(university => {
       if (university.id === selectedUniversityIdToLecturer) {
         return {
@@ -48,7 +46,7 @@ export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
                       ...department,
                       lecturers: [
                         ...department.lecturers,
-                        { id: newId, fullName: newLecturerName }
+                        { id: newId, full_name: newLecturerName }
                       ]
                     };
                   }
@@ -95,7 +93,7 @@ export const LecturersTable = ({ data, setData }: UniversityTableProps) => {
                         <tr key={lecturer.id}>
                           <td>{faculty.name}</td>
                           <td>{department.name}</td>
-                          <td>{lecturer.fullName}</td>
+                          <td>{lecturer.full_name}</td>
                         </tr>
                       ))}
                     </React.Fragment>

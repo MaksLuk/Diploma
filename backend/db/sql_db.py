@@ -224,7 +224,7 @@ class SQLDatabase(Database):
         new_group = Group(
             name=name,
             course=course,
-            speciality_id=speciality_id,
+            specialty_id=speciality_id,
             student_count=student_count
         )
         with Session(self.engine) as session:
@@ -249,7 +249,7 @@ class SQLDatabase(Database):
         department_id: int,
         name: str
     ) -> int:
-        new_teacher = Teacher(name=name, department_id=department_id)
+        new_teacher = Teacher(full_name=name, department_id=department_id)
         with Session(self.engine) as session:
             # Проверка существования "родительской" кафедры
             parent = session.get(Department, department_id)
@@ -257,7 +257,7 @@ class SQLDatabase(Database):
                 raise ValueError(f"Кафедра с ID {department_id} не найдена")
             # Проверка уникальности ФИО
             existing = session.exec(
-                select(Teacher).where(Teacher.name == name)
+                select(Teacher).where(Teacher.full_name == name)
             ).first()
             if existing:
                 raise ValueError(f"Преподаватель '{name}' уже существует")
@@ -286,9 +286,10 @@ class SQLDatabase(Database):
             if not parent_faculty:
                 raise ValueError(f"Факультет с ID {faculty_id} не найден")
             # Проверка существования "родительской" кафедры
-            parent_department = session.get(Department, department_id)
-            if not parent_department:
-                raise ValueError(f"Кафедра с ID {department_id} не найдена")
+            if department_id:
+                parent_department = session.get(Department, department_id)
+                if not parent_department:
+                    raise ValueError(f"Кафедра с ID {department_id} не найдена")
             # Проверка уникальности номера аудитории
             existing = session.exec(
                 select(Classroom).where(Classroom.name == name)
@@ -323,33 +324,21 @@ class SQLDatabase(Database):
     def add_flow(self, groups: list[str]) -> int:
         with Session(self.engine) as session:
             # Проверка существования всех групп
-            missing_groups = []
-            group_objects = []
-            
-            for group_name in groups:
-                group = session.exec(
-                    select(Group).where(Group.name == group_name)
-                ).first()
-                
-                if not group:
-                    missing_groups.append(group_name)
-                else:
-                    group_objects.append(group)
-            
+            found_groups = session.exec(
+                select(Group).where(Group.name.in_(groups))
+            ).all()
+            found_names = {g.name for g in found_groups}
+            missing_groups = [name for name in groups if name not in found_names]
             if missing_groups:
                 raise ValueError(f"Группы {', '.join(missing_groups)} не найдены")
-            
+
             new_flow = Flow()
             session.add(new_flow)
-            # Сохранение, чтобы получить ID потока
-            session.commit()
-            session.refresh(new_flow)
+            session.flush() # Для получения ID потока
             # Создание связи между потоком и группами
-            for group in groups:
-                link = FlowGroupLink(flow_id=new_flow.id, group_id=group.id)
-                session.add(link)
+            for group in found_groups:
+                session.add(FlowGroupLink(flow_id=new_flow.id, group_id=group.id))
             session.commit()
-            session.refresh(new_flow)
             return new_flow.id
 
     def add_lesson_to_plan(

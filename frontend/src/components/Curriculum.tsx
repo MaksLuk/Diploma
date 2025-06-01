@@ -1,6 +1,7 @@
 // Curriculum - учебный план
-import React, { useState, useEffect } from 'react';
-import { CurriculumType, SubjectType, FlowType } from '../types';
+import React, { useState } from 'react';
+import { CurriculumType, SubjectType, FlowType, LecturerType, GroupType } from '../types';
+import { addCurriculumLesson } from '../api';
 
 // Количество часов за семестр
 const HOURS = [72, 108, 144];
@@ -11,60 +12,43 @@ interface CurriculumProps {
   data: CurriculumType[];
   setData: React.Dispatch<React.SetStateAction<CurriculumType[]>>;
   subjects: SubjectType[],
-  allGroups: string[],
+  allGroups: GroupType[],
   flows: FlowType[],
-  lecturers: string[],
+  lecturers: LecturerType[],
 }
 
 export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturers }: CurriculumProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedHours, setSelectedHours] = useState(0);
   const [selectedAttestation, setSelectedAttestation] = useState("");
   const [selectedLecturer, setSelectedLecturer] = useState<string>("");
   const [selectedSecondLecturer, setSelectedSecondLecturer] = useState<string | null>(null);
-
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [filteredGroups, setFilteredGroups] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedFlow, setSelectedFlow] = useState<number | null>(null);
 
-  // Фильтрация подсказок при вводе
-  useEffect(() => {
-    const filtered = allGroups.filter(
-      (group) => 
-        group.toLowerCase().includes(inputValue.toLowerCase()) &&
-        !selectedGroups.includes(group)
+  const handleAddCurriculum = async () => {
+    const selectedSubjectData = subjects.find(u => u.name === selectedSubject);
+    if (!selectedSubjectData) return;
+    const primaryTeacher = lecturers.find(u => u.full_name === selectedLecturer);
+    if (!primaryTeacher) return;
+    const secondaryTeacher = lecturers.find(u => u.full_name === selectedSecondLecturer);
+    const groupData = allGroups.find(u => u.name === selectedGroup);
+    const newId = await addCurriculumLesson(
+      selectedSubjectData.id,
+      selectedHours,
+      primaryTeacher.id,
+      secondaryTeacher?.id,
+      groupData ? groupData.id : undefined,
+      selectedFlow ? selectedFlow : undefined
     );
-    setFilteredGroups(filtered);
-  }, [inputValue, allGroups, selectedGroups]);
-
-  // Добавление группы через input
-  const handleAddGroup = () => {
-    if (inputValue && allGroups.includes(inputValue)) {
-      setSelectedGroups(prev => [...prev, inputValue]);
-      setInputValue('');
-      setShowSuggestions(false);
+    let selectedGroups: string[] = [];
+    if (groupData) selectedGroups = [groupData.name];
+    else {
+      const flow = flows.find(u => u.id == selectedFlow);
+      if (flow)
+        selectedGroups = flow.groups;
     }
-  };
-
-  // Добавление всех групп из выбранного потока
-  const handleAddAllFromFlow = () => {
-    if (selectedFlow === null) return;
-
-    const flow = flows.find(f => f.id === selectedFlow);
-    if (!flow) return;
-
-    const newGroups = flow.groups.filter(g => !selectedGroups.includes(g));
-    setSelectedGroups(prev => [...prev, ...newGroups]);
-    setSelectedFlow(null);
-  };
-
-  const handleAddCurriculum = () => {
-    const newId = data.length > 0
-      ? Math.max(...data.map(g => g.id)) + 1
-      : 1;
     setData([
       ...data,
       {
@@ -77,14 +61,11 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
         secondLecturer: selectedSecondLecturer? selectedSecondLecturer : undefined,
       }
     ]);
-    setSelectedGroups([]);
     setIsModalOpen(false);
     setSelectedSubject("");
     setSelectedHours(0);
     setSelectedAttestation("");
     setSelectedFlow(null);
-    setInputValue('');
-    setShowSuggestions(false);
     setSelectedLecturer("");
     setSelectedSecondLecturer(null);
   };
@@ -138,86 +119,28 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
             ))}
           </select>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                setShowSuggestions(true);
-              }}
-              placeholder="Введите группу"
-              style={{
-                padding: '8px',
-                width: '300px',
-                marginRight: '8px',
-                border: '1px solid #ccc'
-              }}
-            />
-
-            {/* Список подсказок */}
-            {showSuggestions && filteredGroups.length > 0 && (
-              <div 
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  border: '1px solid #ccc',
-                  backgroundColor: 'white',
-                  maxHeight: '150px',
-                  overflowY: 'auto',
-                  marginTop: '2px',
-                  borderRadius: '4px'
-                }}
-              >
-                {filteredGroups.map((group, index) => (
-                  <div 
-                    key={index}
-                    onClick={() => {
-                      setInputValue(group);
-                      setFilteredGroups([]);
-                      setShowSuggestions(false);
-                    }}
-                    style={{
-                      padding: '8px',
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #eee',
-                    }}
-                    className="suggestion"
-                  >
-                    {group}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button 
-              onClick={handleAddGroup} 
-              disabled={!inputValue || !allGroups.includes(inputValue)}
-              style={{
-                padding: '8px 16px',
-                marginLeft: '8px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              className={`add-button ${!inputValue || !allGroups.includes(inputValue) ? 'disabled' : ''}`}
+          <div>
+            <select
+              className="styled-select"
+              value={selectedGroup || ""}
+              onChange={(e) => {setSelectedGroup(e.target.value); setSelectedFlow(null);}}
             >
-              Добавить группу
-            </button>
+              <option value="">Выберите группу</option>
+              {allGroups.map(group => (
+                <option key={group.name} value={group.name}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+
           </div>
 
           {/* Выбор потока для добавления всех групп */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div>
             <select 
+              className="styled-select"
               value={selectedFlow ?? ''}
-              onChange={(e) => setSelectedFlow(Number(e.target.value) || null)}
-              style={{
-                padding: '8px',
-                width: '300px',
-                marginBottom: '8px',
-                border: '1px solid #ccc'
-              }}
+              onChange={(e) => {setSelectedFlow(Number(e.target.value) || null); setSelectedGroup("");}}
             >
               <option value="">Выберите поток</option>
               {flows.map(flow => (
@@ -226,54 +149,7 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
                 </option>
               ))}
             </select>
-
-            <button 
-              onClick={handleAddAllFromFlow}
-              disabled={selectedFlow === null}
-              style={{
-                padding: '8px 16px',
-                marginLeft: '8px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              className={`add-button ${!inputValue || !allGroups.includes(inputValue) ? 'disabled' : ''}`}
-            >
-              Добавить поток
-            </button>
           </div>
-
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {selectedGroups.map((group, index) => (
-              <li 
-                key={index} 
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '8px',
-                  marginBottom: '4px',
-                  border: '1px solid #eee',
-                  borderRadius: '4px'
-                }}
-              >
-                {group}
-                <button 
-                  onClick={() => setSelectedGroups(prev => prev.filter((_, i) => i !== index))}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    color: 'red',
-                    cursor: 'pointer',
-                    marginLeft: '8px'
-                  }}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
 
           <select
             className="styled-select"
@@ -318,7 +194,7 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
             />
             <datalist id="lecturers">
               {lecturers.map(lecturer => (
-                <option key={lecturer} value={lecturer} />
+                <option key={lecturer.full_name} value={lecturer.full_name} />
               ))}
             </datalist>
           </div>
@@ -346,7 +222,7 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
             />
             <datalist id="secondLecturers">
               {lecturers.map(lecturer => (
-                <option key={lecturer} value={lecturer} />
+                <option key={lecturer.full_name} value={lecturer.full_name} />
               ))}
             </datalist>
           </div>
@@ -356,8 +232,8 @@ export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturer
               !selectedSubject ||
               !selectedHours ||
               !selectedAttestation ||
-              !lecturers.includes(selectedLecturer) ||
-              (selectedSecondLecturer !== null && !lecturers.includes(selectedSecondLecturer)) ||
+              !lecturers.map(l => l.full_name).includes(selectedLecturer) ||
+              (selectedSecondLecturer !== null && !lecturers.map(l => l.full_name).includes(selectedSecondLecturer)) ||
               selectedSecondLecturer === selectedLecturer
             }
           >

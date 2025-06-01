@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UniversityTableProps } from '../types';
+import { createStructuralDivision, createSpeciality, createGroup } from '../api';
 
 const COURSES = [
   { value: 'Бакалавриат, 1', label: 'Бакалавриат, 1' },
@@ -75,15 +76,12 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setSelectedSpecialityIdToGroup(null);
   }, [selectedDepartmentIdToGroup]);
 
-  const addUniversity = () => {
-    const currentId = 
-      data.length > 0 
-        ? Math.max(...data.map(f => f.id)) + 1
-        : 1;
+  const addUniversity = async () => {
+    const newId = await createStructuralDivision(newUniversityName);
     setData(prevData => [
       ...prevData,
       {
-        id: currentId,
+        id: newId,
         name: newUniversityName,
         faculties: []
       }
@@ -92,18 +90,14 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setNewUniversityName("");
   };
   
-  const addFaculty = () => {
+  const addFaculty = async () => {
     // Находим выбранный университет
     const selectedUniversity = data.find(
       (university) => university.id === selectedUniversityIdToFaculty
     );
     if (!selectedUniversity) return;
     // Находим максимальный ID факультета в университете. Если их нет, то 0
-    const maxFacultyId = 
-      selectedUniversity.faculties.length > 0 
-        ? Math.max(...selectedUniversity.faculties.map(f => f.id)) 
-        : 0;
-    const newId = maxFacultyId + 1;
+    const newId = await createStructuralDivision(newFacultyName, selectedUniversity.id);
     // Добавляем факультет
     setData(prevData =>
       prevData.map(university => {
@@ -129,7 +123,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setNewFacultyName("");
   };
   
-  const addDepartment = () => {
+  const addDepartment = async () => {
     if (!selectedUniversityIdToDepartment || !selectedFacultyIdToDepartment || !newDepartmentName || !newDepartmentShortName) return;
 
     // Находим выбранный факультет
@@ -138,12 +132,8 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     const selectedFaculty = selectedUniversity.faculties.find(f => f.id === selectedFacultyIdToDepartment);
     if (!selectedFaculty) return;
 
-    // Генерируем новый ID кафедры
-    const newId = selectedFaculty.departments.length > 0
-      ? Math.max(...selectedFaculty.departments.map(d => d.id)) + 1
-      : 1;
-
     // Добавляем кафедру
+    const newId = await createStructuralDivision(newDepartmentName, selectedFaculty.id, newDepartmentShortName);
     setData(prevData => prevData.map(university => {
       if (university.id === selectedUniversityIdToDepartment) {
         return {
@@ -180,7 +170,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setNewDepartmentShortName('');
   };
 
-  const addSpeciality = () => {
+  const addSpeciality = async () => {
     if (
       !selectedUniversityIdToSpeciality ||
       !selectedFacultyIdToSpeciality ||
@@ -196,12 +186,8 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     const selectedDepartment = selectedFaculty.departments.find(d => d.id === selectedDepartmentIdToSpeciality);
     if (!selectedDepartment) return;
 
-    // Генерируем новый ID специальности
-    const newId = selectedDepartment.specialities.length > 0
-      ? Math.max(...selectedDepartment.specialities.map(g => g.id)) + 1
-      : 1;
-
     // Добавляем специальность
+    const newId = await createSpeciality(selectedDepartment.id, newSpecialityName);
     setData(prevData => prevData.map(university => {
       if (university.id === selectedUniversityIdToSpeciality) {
         return {
@@ -243,7 +229,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     setNewSpecialityName('');
   };
   
-  const addGroup = () => {
+  const addGroup = async () => {
     if (
       !selectedUniversityIdToGroup ||
       !selectedFacultyIdToGroup ||
@@ -263,12 +249,8 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
     const selectedSpeciality = selectedDepartment.specialities.find(s => s.id === selectedSpecialityIdToGroup);
     if (!selectedSpeciality) return;
 
-    // Генерируем новый ID группы
-    const newId = selectedSpeciality.groups.length > 0
-      ? Math.max(...selectedSpeciality.groups.map(g => g.id)) + 1
-      : 1;
-
     // Добавляем группу
+    const newId = await createGroup(selectedSpeciality.id, newGroupName, selectedCourse, studentsCount)
     setData(prevData => prevData.map(university => {
       if (university.id === selectedUniversityIdToGroup) {
         return {

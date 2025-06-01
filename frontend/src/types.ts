@@ -3,9 +3,9 @@ type ClassroomType = {
     number: string;
 };
   
-type LecturerType = {
+export type LecturerType = {
     id: number;
-    fullName: string;
+    full_name: string;
 };
   
 export type GroupType = {
@@ -53,7 +53,7 @@ export interface UniversityTableProps {
 export type SubjectType = {
     id: number;
     name: string;
-    shortName: string;  // Сокращение
+    short_name: string;  // Сокращение
 };
 
 // Потоки
