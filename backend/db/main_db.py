@@ -6,7 +6,7 @@
 
 import abc
 from enum import Enum
-from typing import Optional 
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -122,6 +122,31 @@ class CurriculumData(BaseModel):
     secondary_teacher: Optional[str]
 
 
+class ScheduleCellData(BaseModel):
+    '''Данные о ячейке расписания'''
+    lesson_type: LessonType
+    subject: str    # Название предмета
+    teachers: str   # Преподватели
+    classroom: str  # Номер аудитории
+
+
+class ScheduleData(BaseModel):
+    '''Данные о расписании'''
+    data: dict[
+        int,  # Уровень 0: Неделя (1 либо 2)
+        dict[
+            int,  # Уровень 1: День недели (1-6, понедельник-суббота)
+            dict[
+                int,  # Уровень 3: номер пары (1-8)
+                dict[
+                    str,  # Уровень 4: Группа (название)
+                    ScheduleCellData
+                ]
+            ]
+        ]
+    ]
+
+
 class Database(abc.ABC):
     '''Абстрактный класс для взаимодействия с любыми БД'''
     @abc.abstractmethod
@@ -228,3 +253,7 @@ class Database(abc.ABC):
     @abc.abstractmethod
     def get_curriculum(self) -> list[CurriculumData]:
         '''Возвращает учебный план'''
+
+    @abc.abstractmethod
+    def get_schedule(self) -> ScheduleData:
+        '''Возвращает расписание занятий'''

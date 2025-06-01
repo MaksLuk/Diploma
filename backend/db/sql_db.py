@@ -15,7 +15,7 @@ from sqlalchemy.orm import aliased
 from db.main_db import (
     Database, LessonType, CourseEnum, UniversityData, DepartmentData, GroupData,
     FacultyData, LecturerData, ClassroomData, SpecialityData, SubjectsData,
-    FlowsData, CurriculumData
+    FlowsData, CurriculumData, ScheduleData, ScheduleCellData
 )
 
 
@@ -634,6 +634,80 @@ class SQLDatabase(Database):
                 ))
 
             return curriculum_list
+
+    def get_schedule(self) -> ScheduleData:
+        with Session(self.engine) as session:
+            PrimaryTeacher = aliased(Teacher)
+            SecondaryTeacher = aliased(Teacher)
+            
+            schedule_query = (
+                select(
+                    Lesson,
+                    Curriculum,
+                    Subject,
+                    Classroom,
+                    PrimaryTeacher,
+                    SecondaryTeacher,
+                    Group
+                )
+                .join(Curriculum, Lesson.curriculum_id == Curriculum.id)
+                .join(Subject, Curriculum.subject_id == Subject.id)
+                .join(Classroom, Lesson.classroom_id == Classroom.id)
+                .join(PrimaryTeacher, Curriculum.primary_teacher_id == PrimaryTeacher.id)
+                .outerjoin(SecondaryTeacher, Curriculum.secondary_teacher_id == SecondaryTeacher.id)
+                .outerjoin(Group, Curriculum.group_id == Group.id)
+            )
+            results = session.exec(schedule_query).all()
+
+            flow_ids = set()
+            for row in results:
+                _, curriculum, *_, group = row
+                if curriculum.flow_id is not None:
+                    flow_ids.add(curriculum.flow_id)
+
+            flow_groups = defaultdict(list)
+            if flow_ids:
+                flow_group_stmt = select(FlowGroupLink, Group).join(Group).where(FlowGroupLink.flow_id.in_(flow_ids))
+                flow_group_results = session.exec(flow_group_stmt).all()
+                for link, group in flow_group_results:
+                    flow_groups[link.flow_id].append(group)
+
+            schedule_dict = {
+                week: {
+                    day: {pair: {} for pair in range(1,9)} for day in range(1,7)
+                } for week in range(1,3)
+            }
+            for row in results:
+                lesson, curriculum, subject, classroom, primary_teacher, secondary_teacher, group = row
+                
+                groups = []
+                if curriculum.group_id and group is not None:
+                    groups = [group]
+                elif curriculum.flow_id:
+                    groups = flow_groups.get(curriculum.flow_id, [])
+
+                teachers = primary_teacher.full_name
+                if secondary_teacher:
+                    teachers += f", {secondary_teacher.full_name}"
+
+                cell_data = ScheduleCellData(
+                    lesson_type=lesson.lesson_type,
+                    subject=subject.name,
+                    teachers=teachers,
+                    classroom=classroom.name
+                )
+
+                week = int(lesson.week)
+                day = int(lesson.day)
+                pair = int(lesson.pair)
+                for group_obj in groups:
+                    group_name = group_obj.name
+                    
+                    schedule_dict[week][day][pair][group_name] = cell_data
+
+            # Преобразование defaultdict в обычный dict
+            return ScheduleData(data=schedule_dict)
+
 
 def get_database(db_string: str) -> Database:
     '''Проверяет, корректно ли введён параметр базы данных,

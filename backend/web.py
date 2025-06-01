@@ -65,6 +65,9 @@ class WebApp:
         self.app.add_api_route(
             '/schedule', self.add_lesson_to_schedule, methods=["POST"]
         )
+        self.app.add_api_route(
+            '/schedule', self.db.get_schedule, methods=["GET"]
+        )
         self.app.add_api_route('/university_data', self.db.get_university_data)
 
     def add_structural_divizion(
