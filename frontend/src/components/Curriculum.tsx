@@ -1,22 +1,22 @@
-// syllabus - учебный план
+// Curriculum - учебный план
 import React, { useState, useEffect } from 'react';
-import { SyllabusType, SubjectType, FlowType } from '../types';
+import { CurriculumType, SubjectType, FlowType } from '../types';
 
 // Количество часов за семестр
 const HOURS = [72, 108, 144];
 // Вид аттестации
 const ATTESTATIONS = ["Экзамен", "Дифференцированный зачёт", "Зачёт"];
 
-interface SyllabusProps {
-  data: SyllabusType[];
-  setData: React.Dispatch<React.SetStateAction<SyllabusType[]>>;
+interface CurriculumProps {
+  data: CurriculumType[];
+  setData: React.Dispatch<React.SetStateAction<CurriculumType[]>>;
   subjects: SubjectType[],
   allGroups: string[],
   flows: FlowType[],
   lecturers: string[],
 }
 
-export const Syllabus = ({ data, setData, subjects, allGroups, flows, lecturers }: SyllabusProps) => {
+export const Curriculum = ({ data, setData, subjects, allGroups, flows, lecturers }: CurriculumProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedHours, setSelectedHours] = useState(0);
@@ -61,7 +61,7 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows, lecturers 
     setSelectedFlow(null);
   };
 
-  const handleAddSyllabus = () => {
+  const handleAddCurriculum = () => {
     const newId = data.length > 0
       ? Math.max(...data.map(g => g.id)) + 1
       : 1;
@@ -103,14 +103,14 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows, lecturers 
         </tr>
       </thead>
       <tbody>
-        {data.map((syllabus) => (
-          <React.Fragment key={syllabus.id}>
+        {data.map((Curriculum) => (
+          <React.Fragment key={Curriculum.id}>
             <tr>
-              <td>{syllabus.subject}</td>
-              <td>{syllabus.groups.join(", ")}</td>
-              <td>{syllabus.hours}</td>
-              <td>{syllabus.attestation}</td>
-              <td>{syllabus.secondLecturer? syllabus.lecturer + ', ' + syllabus.secondLecturer : syllabus.lecturer}</td>
+              <td>{Curriculum.subject}</td>
+              <td>{Curriculum.groups.join(", ")}</td>
+              <td>{Curriculum.hours}</td>
+              <td>{Curriculum.attestation}</td>
+              <td>{Curriculum.secondLecturer? Curriculum.lecturer + ', ' + Curriculum.secondLecturer : Curriculum.lecturer}</td>
             </tr>
           </React.Fragment>
         ))}
@@ -351,7 +351,7 @@ export const Syllabus = ({ data, setData, subjects, allGroups, flows, lecturers 
             </datalist>
           </div>
           <button
-            onClick={handleAddSyllabus}
+            onClick={handleAddCurriculum}
             disabled={
               !selectedSubject ||
               !selectedHours ||

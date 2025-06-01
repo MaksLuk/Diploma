@@ -4,8 +4,8 @@ import { LecturersTable } from './LecturersTable.tsx';
 import { ClassroomsTable } from './ClassroomsTable.tsx';
 import { SubjectsTable } from './SubjectsTable.tsx';
 import { FlowsTable } from './flowsTable.tsx';
-import { Syllabus } from './Syllabus.tsx';
-import { UniversityType, SubjectType, FlowType, SyllabusType } from '../types';
+import { Curriculum } from './Curriculum.tsx';
+import { UniversityType, SubjectType, FlowType, CurriculumType } from '../types';
 
 export interface DataProps {
   universityData: UniversityType[];
@@ -14,8 +14,8 @@ export interface DataProps {
   setSubjects: React.Dispatch<React.SetStateAction<SubjectType[]>>;
   flows: FlowType[];
   setFlows: React.Dispatch<React.SetStateAction<FlowType[]>>;
-  syllabusData: SyllabusType[];
-  setSyllabusData: React.Dispatch<React.SetStateAction<SyllabusType[]>>;
+  CurriculumData: CurriculumType[];
+  setCurriculumData: React.Dispatch<React.SetStateAction<CurriculumType[]>>;
 }
 
 /// В компоненте описаны все элементы на вкладке "Данные"
@@ -23,7 +23,7 @@ export const DataComponent = ({
   universityData, setUniversityData,
   subjects, setSubjects,
   flows, setFlows,
-  syllabusData, setSyllabusData,
+  CurriculumData, setCurriculumData,
 }: DataProps) => {
   // Получение все названия групп из университетских данных
   const groupNames = useMemo<string[]>(() => {
@@ -77,9 +77,9 @@ export const DataComponent = ({
         data={flows}
         setData={setFlows}
       />
-      <Syllabus
-        data={syllabusData}
-        setData={setSyllabusData}
+      <Curriculum
+        data={CurriculumData}
+        setData={setCurriculumData}
         subjects={subjects}
         allGroups={groupNames}
         flows={flows}

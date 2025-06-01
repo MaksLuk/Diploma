@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UniversityType, SubjectType, FlowType, SyllabusType, GroupType } from '../types';
+import { UniversityType, SubjectType, FlowType, CurriculumType, GroupType } from '../types';
 
 export interface DataProps {
   universityData: UniversityType[];
@@ -8,8 +8,8 @@ export interface DataProps {
   setSubjects: React.Dispatch<React.SetStateAction<SubjectType[]>>;
   flows: FlowType[];
   setFlows: React.Dispatch<React.SetStateAction<FlowType[]>>;
-  syllabusData: SyllabusType[];
-  setSyllabusData: React.Dispatch<React.SetStateAction<SyllabusType[]>>;
+  CurriculumData: CurriculumType[];
+  setCurriculumData: React.Dispatch<React.SetStateAction<CurriculumType[]>>;
 }
 
 const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];

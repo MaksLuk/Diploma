@@ -63,7 +63,7 @@ export type FlowType = {
 };
 
 // Учебный план
-export type SyllabusType = {
+export type CurriculumType = {
     id: number;
     subject: string;    // Идентификация предмета по полному имени
     groups: string[];   // Список групп
