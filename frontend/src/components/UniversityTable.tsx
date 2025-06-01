@@ -573,7 +573,7 @@ export const UniversityTable = ({ data, setData }: UniversityTableProps) => {
 
       {isAddSpecialityModalOpen && (
         <div className="modal">
-          <h3>Добавить группу</h3>
+          <h3>Добавить специальность</h3>
 
           <div className="form-group">
             <label>Университет:</label>
