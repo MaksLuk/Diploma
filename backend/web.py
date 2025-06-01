@@ -69,9 +69,9 @@ class WebApp:
 
     def add_structural_divizion(
         self,
-        parent_id: Optional[int],
         name: str,
-        short_name: Optional[str]
+        short_name: Optional[str] = None,
+        parent_id: Optional[int] = None
     ) -> None:
         '''Добавляет структурное подразделение. Если родительского подразделения
         не существует или подразделеие с таким названием уже есть -
@@ -162,9 +162,9 @@ class WebApp:
         subject_id: int,
         hours: int,
         primary_teacher_id: int,
-        secondary_teacher_id: Optional[int],
-        group_id: Optional[int],
-        flow_id: Optional[int]
+        secondary_teacher_id: Optional[int] = None,
+        group_id: Optional[int] = None,
+        flow_id: Optional[int] = None
     ) -> None:
         '''Добавляет занятие в учебный план.
         Возвращает ошибку 404 если:

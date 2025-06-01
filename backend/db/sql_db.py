@@ -30,8 +30,13 @@ class Department(SQLModel, table=True):
     parent_id: Optional[int] = Field(default=None, foreign_key="department.id")
 
     # Связь на самого себя для иерархии
-    parent: Optional["Department"] = Relationship(back_populates="children", 
-                                                sa_relationship_kwargs={"remote_side": "Department.id"})
+    parent: Optional["Department"] = Relationship(
+        back_populates="children", 
+        sa_relationship_kwargs={
+            "remote_side": "Department.id",
+            "foreign_keys": "Department.parent_id"
+        }
+    )
     children: List["Department"] = Relationship(back_populates="parent")
 
 
@@ -44,6 +49,12 @@ class Specialty(SQLModel, table=True):
     department: Department = Relationship()
 
 
+class FlowGroupLink(SQLModel, table=True):
+    """Связь многие-ко-многим между Потоком и Группами"""
+    flow_id: Optional[int] = Field(default=None, foreign_key="flow.id", primary_key=True)
+    group_id: Optional[int] = Field(default=None, foreign_key="group.id", primary_key=True)
+
+
 class Group(SQLModel, table=True):
     """Группа"""
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -53,12 +64,8 @@ class Group(SQLModel, table=True):
     student_count: int
 
     specialty: Specialty = Relationship()
-
-
-class FlowGroupLink(SQLModel, table=True):
-    """Связь многие-ко-многим между Потоком и Группами"""
-    flow_id: Optional[int] = Field(default=None, foreign_key="flow.id", primary_key=True)
-    group_id: Optional[int] = Field(default=None, foreign_key="group.id", primary_key=True)
+    # Обратная связь для связи многие-ко-многим с Flow
+    flows: List["Flow"] = Relationship(back_populates="groups", link_model=FlowGroupLink)
 
 
 class Flow(SQLModel, table=True):
@@ -76,8 +83,12 @@ class Classroom(SQLModel, table=True):
     faculty_id: int = Field(foreign_key="department.id")
     department_id: Optional[int] = Field(foreign_key="department.id")
 
-    faculty: Department = Relationship()
-    department: Optional[Department] = Relationship()
+    faculty: Department = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "Classroom.faculty_id"}
+    )
+    department: Optional[Department] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "Classroom.department_id"}
+    )
 
 
 class Subject(SQLModel, table=True):
@@ -111,8 +122,14 @@ class Curriculum(SQLModel, table=True):
     flow_id: Optional[int] = Field(default=None, foreign_key="flow.id")
 
     subject: Subject = Relationship()
-    primary_teacher: Teacher = Relationship(sa_relationship_kwargs={"foreign_keys": "Curriculum.primary_teacher_id"})
-    secondary_teacher: Optional[Teacher] = Relationship(sa_relationship_kwargs={"foreign_keys": "Curriculum.secondary_teacher_id"})
+    primary_teacher: Teacher = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "Curriculum.primary_teacher_id"}
+    )
+    secondary_teacher: Optional[Teacher] = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "Curriculum.secondary_teacher_id"
+        }
+    )
     group: Optional[Group] = Relationship()
     flow: Optional[Flow] = Relationship()
 
