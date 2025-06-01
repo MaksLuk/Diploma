@@ -1,5 +1,10 @@
-import React from 'react';
-import { UniversityType, SubjectType, FlowType, CurriculumType, GroupType } from '../types';
+import React, { useState } from 'react';
+import {
+  UniversityType, SubjectType, FlowType, CurriculumType, GroupType,
+  ScheduleData, DayNumber, PairNumber, WeekNumber, ClassroomType, LessonType
+} from '../types';
+import { addScheduleLesson } from '../api';
+
 
 export interface DataProps {
   universityData: UniversityType[];
@@ -20,6 +25,9 @@ export interface DataProps {
   setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>;
   currentWeek: number;
   setCurrentWeek: React.Dispatch<React.SetStateAction<number>>;
+  schedule: ScheduleData;
+  setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
+  allClassrooms: ClassroomType[];
 }
 
 const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
@@ -42,8 +50,16 @@ type rowType = {
 export const ScheduleComponent = ({
   universityData, activeUniversity, setActiveUniversity, activeFaculty,
   setActiveFaculty, activeDepartment, setActiveDepartment, groups, setGroups,
-  currentWeek, setCurrentWeek
+  currentWeek, setCurrentWeek, schedule, setSchedule, allClassrooms, CurriculumData
 }: DataProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDay, setCurrentDay] = useState(1);
+  const [currentPair, setCurrentPair] = useState(1);
+  const [selectedClassroom, setSelectedClassroom] = useState(0);
+  const [selectedType, setSelectedType] = useState<LessonType>("лабораторное");
+  const [selectedCurriculum, setSelectedCurriculum] = useState(0);
+  const [selectedGroup, setSelectedGroup] = useState("");
+
   const rows: rowType[] = daysOfWeek.flatMap(day => 
     pairs.map(pair => ({ day, pair }))
   );
@@ -80,6 +96,38 @@ export const ScheduleComponent = ({
     if (!department) return [];
 
     return department.specialities.flatMap(spec => spec.groups);
+  };
+
+  const handleAddSchedule = async () => {
+    await addScheduleLesson(
+      currentWeek,
+      currentDay,
+      currentPair,
+      selectedClassroom,
+      selectedCurriculum,
+      selectedType
+    );
+    setSchedule(prev => ({
+      data: {
+        ...prev.data,
+        [currentWeek]: {
+          ...prev.data[currentWeek as WeekNumber],
+          [currentDay]: {
+            ...prev.data[currentWeek as WeekNumber]?.[currentDay as DayNumber],
+            [currentPair]: {
+              ...prev.data[currentWeek as WeekNumber]?.[currentDay as DayNumber]?.[currentPair as PairNumber],
+              [selectedGroup]: {
+                lesson_type: selectedType,
+                subject: CurriculumData.find(u => u.id === selectedCurriculum)?.subject,
+                teachers: "Иванова Т.П.",
+                classroom: allClassrooms.find(u => u.id === selectedClassroom)?.number
+              }
+            }
+          }
+        }
+      }
+    }));
+    setIsModalOpen(false);
   };
 
   return (
@@ -183,14 +231,144 @@ export const ScheduleComponent = ({
                 </td>
               }
               <td>{row.pair}</td>
-              {groups.map(group => (
-                <td key={group.id} />
-              ))}
+              {groups.map(group => {
+                const dayNumber = (daysOfWeek.indexOf(row.day) + 1) as DayNumber;
+                const pairNumber = (pairs.indexOf(row.pair) + 1) as PairNumber;
+                const cellData = schedule.data?.[currentWeek as WeekNumber]?.[dayNumber]?.[pairNumber]?.[group.name];
+                
+                return (
+                  <td key={group.id} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                    {cellData ? (
+                      <div>
+                        <div><strong>{cellData.subject}</strong></div>
+                        <div>{cellData.teachers}</div>
+                        <div>{cellData.lesson_type}</div>
+                        <div>{cellData.classroom}</div>
+                      </div>
+                    ) : (
+                      <button onClick={
+                        () => {
+                          setIsModalOpen(true);
+                          setCurrentDay(dayNumber);
+                          setCurrentPair(pairNumber);
+                          setSelectedGroup(group.name);
+                        }
+                      }>+</button>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
       </table>
     }
+    {isModalOpen && (
+      <div className="modal">
+        <div className="form-group">
+          <label htmlFor="week">Неделя:</label>
+          <input
+              id="week"
+              type="text"
+              value={currentWeek}
+              style={{
+                padding: '8px',
+                width: '300px',
+                marginRight: '8px',
+                border: '1px solid #ccc'
+              }}
+              className="form-control"
+              disabled
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="day">День:</label>
+          <input
+              id="day"
+              type="text"
+              value={daysOfWeek[currentDay-1]}
+              style={{
+                padding: '8px',
+                width: '300px',
+                marginRight: '8px',
+                border: '1px solid #ccc'
+              }}
+              className="form-control"
+              disabled
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="pair">Пара:</label>
+          <input
+              id="pair"
+              type="text"
+              value={pairs[currentPair-1]}
+              style={{
+                padding: '8px',
+                width: '300px',
+                marginRight: '8px',
+                border: '1px solid #ccc'
+              }}
+              className="form-control"
+              disabled
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="classroom">Аудитория:</label>
+          <select
+              id="classroom"
+              value={selectedClassroom}
+              className="styled-select"
+              onChange={(e) => setSelectedClassroom(parseInt(e.target.value))}
+          >
+            <option value="0">Выберите аудиторию</option>
+            {allClassrooms.map(classroom => (
+              <option key={classroom.id} value={classroom.id}>
+                {classroom.number}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="classroom">Занятие:</label>
+          <select
+              id="classroom"
+              value={selectedCurriculum}
+              className="styled-select"
+              onChange={(e) => setSelectedCurriculum(parseInt(e.target.value))}
+          >
+            <option value="0">Выберите занятие</option>
+            {CurriculumData.map(curriculum => (
+              <option key={curriculum.id} value={curriculum.id}>
+                {curriculum.subject} {curriculum.primary_teacher} {curriculum.secondary_teacher}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="classroom">Тип занятия:</label>
+          <select
+              id="classroom"
+              value={selectedType}
+              className="styled-select"
+              onChange={(e) => setSelectedType(e.target.value as LessonType)}
+          >
+            <option key="лекционное" value="лекционное">Лекционное</option>
+            <option key="лабораторное" value="лабораторное">Лабораторное</option>
+          </select>
+        </div>
+
+        <button
+            onClick={handleAddSchedule}
+            disabled={selectedClassroom == 0 || selectedCurriculum == 0}
+        >
+          Добавить
+        </button>
+        <button onClick={() => setIsModalOpen(false)}>
+          Отмена
+        </button>
+      </div>
+    )}
     </>
   );
 };

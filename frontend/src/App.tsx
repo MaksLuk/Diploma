@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import './App.css'
 import {
-  UniversityType, SubjectType, FlowType, CurriculumType, GroupType
+  UniversityType, SubjectType, FlowType, CurriculumType, GroupType,
+  ScheduleData, ClassroomType
 } from './types';
 import {
-  fetchUniversityData, fetchSubjects, fetchFlows, fetchCurriculum
+  fetchUniversityData, fetchSubjects, fetchFlows, fetchCurriculum, fetchSchedule
 } from './api';
 
 import { ScheduleComponent } from './components/ScheduleComponent.tsx';
@@ -15,6 +16,7 @@ function App() {
   const [subjects, setSubjects] = useState<SubjectType[]>([]);
   const [flows, setFlows] = useState<FlowType[]>([]);
   const [curriculum, setCurriculum] = useState<CurriculumType[]>([]);
+  const [schedule, setSchedule] = useState<ScheduleData>({data: {}});
 
   // Для вкладки "Расписание"
   const [activeUniversity, setActiveUniversity] = useState<string | null>(null);
@@ -22,6 +24,21 @@ function App() {
   const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
   const [groupsForSchedule, setGroupsForSchedule] = useState<GroupType[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number>(1);
+
+  const allClassrooms = useMemo<ClassroomType[]>(() => {
+    const getAllGroups = (data: UniversityType[]): ClassroomType[] => {
+      let facultiesClassrooms = data.flatMap(university =>
+        university.faculties.flatMap(faculty => faculty.classrooms)
+      );
+      let departmentsClassrooms = data.flatMap(university =>
+        university.faculties.flatMap(faculty => 
+          faculty.departments.flatMap(department => department.classrooms)
+        )
+      );
+      return facultiesClassrooms.concat(departmentsClassrooms);
+    };
+    return Array.from(new Set(getAllGroups(universityData)));
+  }, [universityData]);
 
   const [activeTab, setActiveTab] = useState('Данные');
 
@@ -35,6 +52,8 @@ function App() {
       setFlows(flowsData);
       const curriculumData = await fetchCurriculum();
       setCurriculum(curriculumData);
+      const scheduleData = await fetchSchedule();
+      setSchedule(scheduleData);
     };
 
     loadData();
@@ -95,6 +114,9 @@ function App() {
             setGroups={setGroupsForSchedule}
             currentWeek={currentWeek}
             setCurrentWeek={setCurrentWeek}
+            schedule={schedule}
+            setSchedule={setSchedule}
+            allClassrooms={allClassrooms}
           />
         }
       </div>

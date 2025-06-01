@@ -1,4 +1,4 @@
-type ClassroomType = {
+export type ClassroomType = {
     id: number;
     number: string;
 };
@@ -71,3 +71,32 @@ export type CurriculumType = {
     primary_teacher: string; // ФИО преподавателя
     secondary_teacher?: string; // ФИО второго преподавателя
 };
+
+// Типы для расписания занятий (получение из API)
+
+export type LessonType = "лекционное" | "лабораторное";
+
+// Данные ячейки расписания
+export interface ScheduleCellData {
+  lesson_type: LessonType;
+  subject: string;     // Название предмета
+  teachers: string;    // Преподаватели
+  classroom: string;   // Номер аудитории
+}
+
+export type WeekNumber = 1 | 2; // Номер недели
+export type DayNumber = 1 | 2 | 3 | 4 | 5 | 6; // День недели (Пн-Сб)
+export type PairNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; // Номер пары
+
+// Основная структура расписания
+export interface ScheduleData {
+    data: {
+      [week in WeekNumber]?: {                      // Неделя (1 или 2)
+        [day in DayNumber]?: {                     // День недели (1-6)
+          [classNum in PairNumber]?: {            // Номер пары (1-8)
+            [group: string]: ScheduleCellData;     // Группа (название)
+          }
+        }
+      }
+    }
+  }

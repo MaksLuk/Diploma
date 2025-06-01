@@ -5,8 +5,6 @@ import { addCurriculumLesson } from '../api';
 
 // Количество часов за семестр
 const HOURS = [72, 108, 144];
-// Вид аттестации
-//const ATTESTATIONS = ["Экзамен", "Дифференцированный зачёт", "Зачёт"];
 
 interface CurriculumProps {
   data: CurriculumType[];

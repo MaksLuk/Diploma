@@ -1,6 +1,8 @@
 // Модуль определяет взаимодействие с методами API
 
-import { UniversityType, SubjectType, FlowType, CurriculumType } from './types';
+import {
+  UniversityType, SubjectType, FlowType, CurriculumType, ScheduleData
+} from './types';
 
 
 // Получение данных о структурных подразделения университета
@@ -57,6 +59,20 @@ export const fetchCurriculum = async (): Promise<CurriculumType[]> => {
       console.error("Failed to fetch university data:", error);
       return [];
     }
+};
+
+// Получение расписания
+export const fetchSchedule = async (): Promise<ScheduleData> => {
+  try {
+    const response = await fetch("http://localhost:8000/schedule");
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch university data:", error);
+    return {data: {}};
+  }
 };
 
 // Добавление структурного подразделения: университета, факультета либо кафедры
