@@ -16,8 +16,10 @@ export interface DataProps {
   setActiveFaculty: React.Dispatch<React.SetStateAction<string | null>>;
   activeDepartment: string | null;
   setActiveDepartment: React.Dispatch<React.SetStateAction<string | null>>;
-  groups: GroupType[];  // Столбцы
+  groups: GroupType[];  // Текущие группы для выбранной кафедры
   setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>;
+  currentWeek: number;
+  setCurrentWeek: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
@@ -39,7 +41,8 @@ type rowType = {
 
 export const ScheduleComponent = ({
   universityData, activeUniversity, setActiveUniversity, activeFaculty,
-  setActiveFaculty, activeDepartment, setActiveDepartment, groups, setGroups
+  setActiveFaculty, activeDepartment, setActiveDepartment, groups, setGroups,
+  currentWeek, setCurrentWeek
 }: DataProps) => {
   const rows: rowType[] = daysOfWeek.flatMap(day => 
     pairs.map(pair => ({ day, pair }))
@@ -82,6 +85,21 @@ export const ScheduleComponent = ({
   return (
     <>
     <div>
+      <div style={{ position: 'absolute', right: '15px' }}>
+        <button
+          className={currentWeek === 1 ? 'active' : ''}
+          onClick={() => setCurrentWeek(1)}
+          style={{ marginRight: 5 }}
+        >
+          1 неделя
+        </button>
+        <button
+          className={currentWeek === 2 ? 'active' : ''}
+          onClick={() => setCurrentWeek(2)}
+        >
+          2 неделя
+        </button>
+      </div>
       <div>
         {universityData.map((university) => (
           <button

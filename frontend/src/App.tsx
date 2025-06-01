@@ -21,6 +21,7 @@ function App() {
   const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
   const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
   const [groupsForSchedule, setGroupsForSchedule] = useState<GroupType[]>([]);
+  const [currentWeek, setCurrentWeek] = useState<number>(1);
 
   const [activeTab, setActiveTab] = useState('Данные');
 
@@ -92,6 +93,8 @@ function App() {
             setActiveDepartment={setActiveDepartment}
             groups={groupsForSchedule}
             setGroups={setGroupsForSchedule}
+            currentWeek={currentWeek}
+            setCurrentWeek={setCurrentWeek}
           />
         }
       </div>
