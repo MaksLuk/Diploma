@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { UniversityType, SubjectType, FlowType, CurriculumType, GroupType } from '../types';
 
 export interface DataProps {
@@ -10,6 +10,14 @@ export interface DataProps {
   setFlows: React.Dispatch<React.SetStateAction<FlowType[]>>;
   CurriculumData: CurriculumType[];
   setCurriculumData: React.Dispatch<React.SetStateAction<CurriculumType[]>>;
+  activeUniversity: string | null;
+  setActiveUniversity: React.Dispatch<React.SetStateAction<string | null>>;
+  activeFaculty: string | null;
+  setActiveFaculty: React.Dispatch<React.SetStateAction<string | null>>;
+  activeDepartment: string | null;
+  setActiveDepartment: React.Dispatch<React.SetStateAction<string | null>>;
+  groups: GroupType[];  // Столбцы
+  setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>;
 }
 
 const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
@@ -29,12 +37,13 @@ type rowType = {
   pair: string;
 }
 
-export const ScheduleComponent = ({ universityData }: DataProps) => {
-  const [activeUniversity, setActiveUniversity] = useState<string | null>(null);
-  const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
-  const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
-  const [groups, setGroups] = useState<GroupType[]>([]);
-  const [rows, setRows] = useState<rowType[]>([]);
+export const ScheduleComponent = ({
+  universityData, activeUniversity, setActiveUniversity, activeFaculty,
+  setActiveFaculty, activeDepartment, setActiveDepartment, groups, setGroups
+}: DataProps) => {
+  const rows: rowType[] = daysOfWeek.flatMap(day => 
+    pairs.map(pair => ({ day, pair }))
+  );
 
   const handleTabClick = (university: string) => {
     setActiveUniversity(university);
@@ -49,9 +58,6 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
     setActiveDepartment(department);
     let currentGroups = getGroupsForActiveDepartment(department);
     setGroups(currentGroups);
-    setRows(daysOfWeek.flatMap(day => 
-      pairs.map(pair => ({ day, pair }))
-    ));
   };
 
   // Функция для получения групп по выбранной кафедре
@@ -67,7 +73,7 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
         department.specialities.flatMap(spec => spec.groups)
       );
     }
-    const department = faculty.departments.find(d => d.shortName === departmentName);
+    const department = faculty.departments.find(d => d.short_name === departmentName);
     if (!department) return [];
 
     return department.specialities.flatMap(spec => spec.groups);
@@ -120,10 +126,10 @@ export const ScheduleComponent = ({ universityData }: DataProps) => {
                           </button>
                           {faculty.departments.map((department) => (
                             <button
-                              className={activeDepartment === department.shortName ? 'active' : ''}
-                              onClick={() => handleThirdTabClick(department.shortName)}
+                              className={activeDepartment === department.short_name ? 'active' : ''}
+                              onClick={() => handleThirdTabClick(department.short_name)}
                             >
-                              {department.shortName}
+                              {department.short_name}
                             </button>
                           ))}
                         </React.Fragment>

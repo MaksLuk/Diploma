@@ -25,7 +25,7 @@ type SpecialitiesType = {
 type DepartmentType = {
     id: number;
     name: string;
-    shortName: string;
+    short_name: string;
     specialities: SpecialitiesType[];
     lecturers: LecturerType[];
     classrooms: ClassroomType[];

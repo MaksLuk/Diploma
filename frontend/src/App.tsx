@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { UniversityType, SubjectType, FlowType, CurriculumType } from './types';
-import { fetchUniversityData, fetchSubjects, fetchFlows, fetchCurriculum } from './api';
+import {
+  UniversityType, SubjectType, FlowType, CurriculumType, GroupType
+} from './types';
+import {
+  fetchUniversityData, fetchSubjects, fetchFlows, fetchCurriculum
+} from './api';
 
 import { ScheduleComponent } from './components/ScheduleComponent.tsx';
 import { DataComponent } from './components/DataComponent.tsx';
@@ -12,12 +16,17 @@ function App() {
   const [flows, setFlows] = useState<FlowType[]>([]);
   const [curriculum, setCurriculum] = useState<CurriculumType[]>([]);
 
+  // Для вкладки "Расписание"
+  const [activeUniversity, setActiveUniversity] = useState<string | null>(null);
+  const [activeFaculty, setActiveFaculty] = useState<string | null>(null);
+  const [activeDepartment, setActiveDepartment] = useState<string | null>(null);
+  const [groupsForSchedule, setGroupsForSchedule] = useState<GroupType[]>([]);
+
   const [activeTab, setActiveTab] = useState('Данные');
 
   useEffect(() => {
     const loadData = async () => {
       const universetyData = await fetchUniversityData();
-      console.log(universetyData);
       setUniversityData(universetyData);
       const subjectsData = await fetchSubjects();
       setSubjects(subjectsData);
@@ -75,6 +84,14 @@ function App() {
             setFlows={setFlows}
             CurriculumData={curriculum}
             setCurriculumData={setCurriculum}
+            activeUniversity={activeUniversity}
+            setActiveUniversity={setActiveUniversity}
+            activeFaculty={activeFaculty}
+            setActiveFaculty={setActiveFaculty}
+            activeDepartment={activeDepartment}
+            setActiveDepartment={setActiveDepartment}
+            groups={groupsForSchedule}
+            setGroups={setGroupsForSchedule}
           />
         }
       </div>
