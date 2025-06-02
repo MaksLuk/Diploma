@@ -78,6 +78,7 @@ export type LessonType = "лекционное" | "лабораторное";
 
 // Данные ячейки расписания
 export interface ScheduleCellData {
+  id: number;
   lesson_type: LessonType;
   subject: string;     // Название предмета
   teachers: string;    // Преподаватели

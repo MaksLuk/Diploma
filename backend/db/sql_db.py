@@ -691,6 +691,7 @@ class SQLDatabase(Database):
                     teachers += f", {secondary_teacher.full_name}"
 
                 cell_data = ScheduleCellData(
+                    id=lesson.id,
                     lesson_type=lesson.lesson_type,
                     subject=subject.name,
                     teachers=teachers,
@@ -707,6 +708,42 @@ class SQLDatabase(Database):
 
             # Преобразование defaultdict в обычный dict
             return ScheduleData(data=schedule_dict)
+
+    def edit_schedule_cell(
+        self,
+        id: int,
+        classroom_id: int,
+        curriculum_id: int,
+        lesson_type: LessonType
+    ) -> None:
+        with Session(self.engine) as session:
+            # Получение занятия
+            lesson = session.get(Lesson, id)
+            if not lesson:
+                raise ValueError(f"Ячейка расписания с ID {id} не найдена")
+            # Проверка существования аудитории
+            classroom = session.get(Classroom, classroom_id)
+            if not classroom:
+                raise ValueError(f"Аудитория с ID {classroom_id} не найдена")
+            # Проверка существования занятия в учебном плане
+            lesson_in_curriculum = session.get(Curriculum, curriculum_id)
+            if not lesson_in_curriculum:
+                raise ValueError(f"Занятия с ID {curriculum_id} нет в учебном плане")
+
+            lesson.classroom_id = classroom_id
+            lesson.curriculum_id = curriculum_id
+            lesson.lesson_type = lesson_type
+
+            session.add(lesson)
+            session.commit()
+
+    def remove_schedule_cell(self, id: int) -> None:
+        with Session(self.engine) as session:
+            lesson = session.get(Lesson, id)
+            if not lesson:
+                raise ValueError(f"Ячейка расписания с ID {id} не найдена")
+            session.delete(lesson)
+            session.commit()
 
 
 def get_database(db_string: str) -> Database:

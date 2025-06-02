@@ -68,6 +68,12 @@ class WebApp:
         self.app.add_api_route(
             '/schedule', self.db.get_schedule, methods=["GET"]
         )
+        self.app.add_api_route(
+            '/schedule', self.edit_schedule_cell, methods=["PUT"]
+        )
+        self.app.add_api_route(
+            '/schedule', self.remove_schedule_cell, methods=["DELETE"]
+        )
         self.app.add_api_route('/university_data', self.db.get_university_data)
 
     def add_structural_divizion(
@@ -208,6 +214,28 @@ class WebApp:
             return self.db.add_lesson_to_schedule(
                 week, day, pair, classroom_id, curriculum_id, lesson_type
             )
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=exc.message) from exc
+
+    def edit_schedule_cell(
+        self,
+        id: int,
+        classroom_id: int,
+        curriculum_id: int,
+        lesson_type: LessonType
+    ) -> None:
+        '''Изменяет ячейку расписания с заданным id'''
+        try:
+            return self.db.edit_schedule_cell(
+                id, classroom_id, curriculum_id, lesson_type
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=exc.message) from exc
+
+    def remove_schedule_cell(self, id: int) -> None:
+        '''Удаляет ячейку расписания с заданным id'''
+        try:
+            return self.db.remove_schedule_cell(id)
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
 

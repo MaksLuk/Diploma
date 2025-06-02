@@ -124,6 +124,7 @@ class CurriculumData(BaseModel):
 
 class ScheduleCellData(BaseModel):
     '''Данные о ячейке расписания'''
+    id: int
     lesson_type: LessonType
     subject: str    # Название предмета
     teachers: str   # Преподватели
@@ -257,3 +258,17 @@ class Database(abc.ABC):
     @abc.abstractmethod
     def get_schedule(self) -> ScheduleData:
         '''Возвращает расписание занятий'''
+
+    @abc.abstractmethod
+    def edit_schedule_cell(
+        self,
+        id: int,
+        classroom_id: int,
+        curriculum_id: int,
+        lesson_type: LessonType
+    ) -> None:
+        '''Изменяет ячейку расписания занятий'''
+
+    @abc.abstractmethod
+    def remove_schedule_cell(self, id: int) -> None:
+        '''Удаляет ячейку расписания занятий'''
