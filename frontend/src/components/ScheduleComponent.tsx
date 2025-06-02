@@ -3,7 +3,7 @@ import {
   UniversityType, SubjectType, FlowType, CurriculumType, GroupType,
   ScheduleData, DayNumber, PairNumber, WeekNumber, ClassroomType, LessonType
 } from '../types';
-import { addScheduleLesson } from '../api';
+import { addScheduleLesson, fetchRemoveSchedule, fetchEditSchedule } from '../api';
 
 
 export interface DataProps {
@@ -59,6 +59,9 @@ export const ScheduleComponent = ({
   const [selectedType, setSelectedType] = useState<LessonType>("лабораторное");
   const [selectedCurriculum, setSelectedCurriculum] = useState(0);
   const [selectedGroup, setSelectedGroup] = useState("");
+  // Добавление или изменение ячейки расписание. true - добавление, false - изменение
+  const [changeOrNew, setChangeOrNew] = useState(true);
+  const [changedId, setChangedId] = useState(0);  // ID какой ячейки меняем
 
   const rows: rowType[] = daysOfWeek.flatMap(day => 
     pairs.map(pair => ({ day, pair }))
@@ -99,7 +102,7 @@ export const ScheduleComponent = ({
   };
 
   const handleAddSchedule = async () => {
-    await addScheduleLesson(
+    const newId = await addScheduleLesson(
       currentWeek,
       currentDay,
       currentPair,
@@ -117,6 +120,7 @@ export const ScheduleComponent = ({
             [currentPair]: {
               ...prev.data[currentWeek as WeekNumber]?.[currentDay as DayNumber]?.[currentPair as PairNumber],
               [selectedGroup]: {
+                id: newId,
                 lesson_type: selectedType,
                 subject: CurriculumData.find(u => u.id === selectedCurriculum)?.subject,
                 teachers: "Иванова Т.П.",
@@ -128,6 +132,94 @@ export const ScheduleComponent = ({
       }
     }));
     setIsModalOpen(false);
+  };
+
+  // Изменение ячейки расписания
+  const handleChangechedule = async () => {
+    await fetchEditSchedule(changedId, selectedClassroom, selectedCurriculum, selectedType);
+    setSchedule(prev => ({
+      data: {
+        ...prev.data,
+        ...([1, 2] as WeekNumber[]).reduce((weeks, week) => {
+          const weekData = prev.data[week];
+          if (!weekData) return weeks;
+          
+          return {
+            ...weeks,
+            [week]: {
+              ...weekData,
+              ...([1, 2, 3, 4, 5, 6] as DayNumber[]).reduce((days, day) => {
+                const dayData = weekData[day];
+                if (!dayData) return days;
+                
+                return {
+                  ...days,
+                  [day]: {
+                    ...dayData,
+                    ...([1, 2, 3, 4, 5, 6, 7, 8] as PairNumber[]).reduce((pairs, pair) => {
+                      const pairData = dayData[pair];
+                      if (!pairData) return pairs;
+                      
+                      let updated = false;
+                      const updatedGroups = Object.entries(pairData).reduce((groups, [group, cell]) => {
+                        if (cell.id === changedId) {
+                          updated = true;
+                          return {
+                            ...groups,
+                            [group]: {
+                              ...cell,
+                              lesson_type: selectedType,
+                              subject: CurriculumData.find(u => u.id === selectedCurriculum)?.subject || cell.subject,
+                              classroom: allClassrooms.find(u => u.id === selectedClassroom)?.number || cell.classroom
+                            }
+                          };
+                        }
+                        return {...groups, [group]: cell};
+                      }, {});
+    
+                      return updated ? {...pairs, [pair]: updatedGroups} : pairs;
+                    }, {})
+                  }
+                };
+              }, {})
+            }
+          };
+        }, {})
+      }
+    }));
+    setIsModalOpen(false);
+  };
+
+  // Удаление ячейки расписания
+  const handleRemoveCell = async (removedCellId: number) => {
+    await fetchRemoveSchedule(removedCellId);
+    setSchedule(prev => ({
+      data: {
+          ...prev.data,
+          ...([1, 2] as WeekNumber[]).reduce((weeksAcc, week) => ({
+              ...weeksAcc,
+              [week]: prev.data[week] && {
+                  ...prev.data[week],
+                  ...([1, 2, 3, 4, 5, 6] as DayNumber[]).reduce((daysAcc, day) => ({
+                      ...daysAcc,
+                      [day]: prev.data[week]?.[day] && {
+                          ...prev.data[week]?.[day],
+                          ...([1, 2, 3, 4, 5, 6, 7, 8] as PairNumber[]).reduce((pairsAcc, pair) => ({
+                              ...pairsAcc,
+                              [pair]: Object.entries(prev.data[week]?.[day]?.[pair] || {}).reduce(
+                                  (groupsAcc, [group, cellData]) => 
+                                      cellData.id === removedCellId 
+                                          ? groupsAcc 
+                                          : { ...groupsAcc, [group]: cellData },
+                                  {}
+                              )
+                          }), {})
+                      }
+                  }), {})
+              }
+          }), {})
+      }
+    }));
   };
 
   return (
@@ -246,8 +338,26 @@ export const ScheduleComponent = ({
                           display: 'flex',
                           zIndex: 10
                         }}>
-                          <button style={{ width: '20px', height: '20px', background: 'transparent', padding: 0, paddingRight: '15px' }}>✎</button>
-                          <button style={{ width: '20px', height: '20px', background: 'transparent', padding: 0 }}>✕</button>
+                          <button
+                            onClick={ () => {
+                              setIsModalOpen(true);
+                              setCurrentDay(dayNumber);
+                              setCurrentPair(pairNumber);
+                              setSelectedGroup(group.name);
+                              const classroomData = allClassrooms.find(u => u.number === cellData.classroom)?.id;
+                              if (classroomData) setSelectedClassroom(classroomData);
+                              const curriculumData = CurriculumData.find(u => u.subject === cellData.subject)?.id;
+                              if(curriculumData) setSelectedCurriculum(curriculumData);
+                              setSelectedType(cellData.lesson_type);
+                              setChangeOrNew(false);  // Изменение
+                              setChangedId(cellData.id);
+                            } }
+                            style={{ width: '20px', height: '20px', background: 'transparent', padding: 0, paddingRight: '15px' }}
+                          >✎</button>
+                          <button
+                            onClick={ () => handleRemoveCell(cellData.id) }
+                            style={{ width: '20px', height: '20px', background: 'transparent', padding: 0 }}
+                          >✕</button>
                         </div>
                         <div><strong>{cellData.subject}</strong></div>
                         <div>{cellData.teachers}</div>
@@ -261,6 +371,7 @@ export const ScheduleComponent = ({
                           setCurrentDay(dayNumber);
                           setCurrentPair(pairNumber);
                           setSelectedGroup(group.name);
+                          setChangeOrNew(true); // Добавление
                         }
                       }>+</button>
                     )}
@@ -368,12 +479,20 @@ export const ScheduleComponent = ({
         </div>
 
         <button
-            onClick={handleAddSchedule}
+            onClick={() => {
+              if (changeOrNew) handleAddSchedule();
+              else handleChangechedule();
+            }}
             disabled={selectedClassroom == 0 || selectedCurriculum == 0}
         >
-          Добавить
+          {changeOrNew ? 'Добавить' : 'Изменить'}
         </button>
-        <button onClick={() => setIsModalOpen(false)}>
+        <button onClick={() => {
+          setIsModalOpen(false);
+          setSelectedType("лабораторное");
+          setSelectedClassroom(0);
+          setSelectedCurriculum(0);
+        }}>
           Отмена
         </button>
       </div>

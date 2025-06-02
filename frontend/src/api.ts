@@ -75,6 +75,67 @@ export const fetchSchedule = async (): Promise<ScheduleData> => {
   }
 };
 
+// Удаление ячейки расписания
+export const fetchRemoveSchedule = async (id: number): Promise<null> => {
+  try {
+    const url = new URL('http://localhost:8000/schedule');
+    url.searchParams.append('id', id.toString());
+    const response = await fetch(url.toString(), {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Ошибка ${response.status}: ${errorData.detail || 'Неизвестная ошибка'}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Ошибка создания специальности:', error);
+    throw error;
+  }
+};
+
+// Изменение ячейки расписания
+export const fetchEditSchedule = async (
+  id: number,
+  classroom_id: number,
+  curriculum_id: number,
+  lesson_type: string
+): Promise<null> => {
+  try {
+    const url = new URL('http://localhost:8000/schedule');
+    url.searchParams.append('id', id.toString());
+    url.searchParams.append('classroom_id', classroom_id.toString());
+    url.searchParams.append('curriculum_id', curriculum_id.toString());
+    url.searchParams.append('lesson_type', lesson_type);
+
+    const response = await fetch(url.toString(), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Ошибка ${response.status}: ${errorData.detail || 'Неизвестная ошибка'}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Ошибка создания специальности:', error);
+    throw error;
+  }
+};
+
 // Добавление структурного подразделения: университета, факультета либо кафедры
 export const createStructuralDivision = async (
   name: string,
