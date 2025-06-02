@@ -338,7 +338,7 @@ export const ScheduleComponent = ({
               onChange={(e) => setSelectedCurriculum(parseInt(e.target.value))}
           >
             <option value="0">Выберите занятие</option>
-            {CurriculumData.map(curriculum => (
+            {CurriculumData.filter(u => u.groups.includes(selectedGroup)).map(curriculum => (
               <option key={curriculum.id} value={curriculum.id}>
                 {curriculum.subject} {curriculum.primary_teacher} {curriculum.secondary_teacher}
               </option>
