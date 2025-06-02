@@ -239,7 +239,16 @@ export const ScheduleComponent = ({
                 return (
                   <td key={group.id} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     {cellData ? (
-                      <div>
+                      <div style={{ position: 'relative' }}>
+                        <div style={{
+                          position: 'absolute',
+                          right: '4px',
+                          display: 'flex',
+                          zIndex: 10
+                        }}>
+                          <button style={{ width: '20px', height: '20px', background: 'transparent', padding: 0, paddingRight: '15px' }}>✎</button>
+                          <button style={{ width: '20px', height: '20px', background: 'transparent', padding: 0 }}>✕</button>
+                        </div>
                         <div><strong>{cellData.subject}</strong></div>
                         <div>{cellData.teachers}</div>
                         <div>{cellData.lesson_type}</div>
