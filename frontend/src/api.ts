@@ -417,3 +417,43 @@ export const addScheduleLesson = async (
     throw error;
   }
 };
+
+// Автоматическое построение расписания
+export const autoShedule = async () => {
+  try {
+    const url = new URL('http://localhost:8000/auto_create_schedule');
+    const response = await fetch(url.toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Ошибка ${response.status}: ${errorData.detail || 'Неизвестная ошибка'}`);
+    }
+  } catch (error) {
+    console.error('Ошибка автоматического построения расписания:', error);
+    throw error;
+  }
+};
+
+// Автоматическое нахождение коллизий расписания
+export const findCollisions = async () => {
+  try {
+    const url = new URL('http://localhost:8000/find_collisions');
+    const response = await fetch(url.toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Ошибка ${response.status}: ${errorData.detail || 'Неизвестная ошибка'}`);
+    }
+    const data = await response.json();
+    console.log(data);
+  } catch (error) {
+    console.error('Ошибка автоматического построения расписания:', error);
+    throw error;
+  }
+};

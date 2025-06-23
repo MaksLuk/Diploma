@@ -10,6 +10,7 @@ from collections import defaultdict
 from sqlmodel import (
   Field, SQLModel, create_engine, Session, select, Relationship, CheckConstraint
 )
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
 from db.main_db import (
@@ -744,6 +745,530 @@ class SQLDatabase(Database):
                 raise ValueError(f"Ячейка расписания с ID {id} не найдена")
             session.delete(lesson)
             session.commit()
+
+    def create_test_data(self) -> None:
+        '''Создание тестовых данных'''
+        with Session(self.engine) as session:
+            # Университет
+            university = Department(name="Технический Университет", short_name="ТУ")
+            session.add(university)
+            session.commit()
+            session.refresh(university)
+            
+            # Факультеты
+            faculty1 = Department(
+                name="Факультет Информационных Технологий", 
+                short_name="ФИТ",
+                parent_id=university.id
+            )
+            faculty2 = Department(
+                name="Инженерный Факультет", 
+                short_name="ИФ",
+                parent_id=university.id
+            )
+            session.add_all([faculty1, faculty2])
+            session.commit()
+            session.refresh(faculty1)
+            session.refresh(faculty2)
+            
+            # Кафедры
+            department1 = Department(
+                name="Кафедра Программной Инженерии",
+                short_name="КПИ",
+                parent_id=faculty1.id
+            )
+            department2 = Department(
+                name="Кафедра Искусственного Интеллекта",
+                short_name="КИИ",
+                parent_id=faculty1.id
+            )
+            department3 = Department(
+                name="Кафедра Машиностроения",
+                short_name="КМ",
+                parent_id=faculty2.id
+            )
+            session.add_all([department1, department2, department3])
+            session.commit()
+            session.refresh(department1)
+            session.refresh(department2)
+            session.refresh(department3)
+            
+            # Специальности
+            spec1 = Specialty(name="Программная инженерия", department_id=department1.id)
+            spec2 = Specialty(name="Искусственный интеллект", department_id=department2.id)
+            spec3 = Specialty(name="Машиностроение", department_id=department3.id)
+            session.add_all([spec1, spec2, spec3])
+            session.commit()
+            session.refresh(spec1)
+            session.refresh(spec2)
+            session.refresh(spec3)
+            
+            # Группы
+            groups = [
+                # ФИТ
+                Group(name="ПИ-101", course=CourseEnum.BACHELOR_1, specialty_id=spec1.id, student_count=20),
+                Group(name="ПИ-102", course=CourseEnum.BACHELOR_1, specialty_id=spec1.id, student_count=25),
+                Group(name="ПИ-201", course=CourseEnum.BACHELOR_2, specialty_id=spec1.id, student_count=30),
+                Group(name="ПИ-301", course=CourseEnum.BACHELOR_3, specialty_id=spec1.id, student_count=28),
+                
+                Group(name="ИИ-101", course=CourseEnum.BACHELOR_1, specialty_id=spec2.id, student_count=22),
+                Group(name="ИИ-201", course=CourseEnum.BACHELOR_2, specialty_id=spec2.id, student_count=26),
+                
+                # ИФ
+                Group(name="МС-101", course=CourseEnum.BACHELOR_1, specialty_id=spec3.id, student_count=35),
+                Group(name="МС-102", course=CourseEnum.BACHELOR_1, specialty_id=spec3.id, student_count=40),
+                Group(name="МС-301", course=CourseEnum.BACHELOR_3, specialty_id=spec3.id, student_count=32),
+            ]
+            session.add_all(groups)
+            session.commit()
+            
+            # Потоки
+            flow1 = Flow()  # Поток из ПИ-101 и ПИ-102
+            flow2 = Flow()  # Поток из МС-101 и МС-102
+            session.add_all([flow1, flow2])
+            session.flush()
+            
+            # Добавление групп в потоки
+            for group in [groups[0], groups[1]]:  # ПИ-101, ПИ-102
+                session.add(FlowGroupLink(flow_id=flow1.id, group_id=group.id))
+            
+            for group in [groups[6], groups[7]]:  # МС-101, МС-102
+                session.add(FlowGroupLink(flow_id=flow2.id, group_id=group.id))
+            
+            # Аудитории
+            classrooms = [
+                # Аудитории кафедр
+                Classroom(name="А-101", capacity=30, faculty_id=faculty1.id, department_id=department1.id),
+                Classroom(name="А-102", capacity=40, faculty_id=faculty1.id, department_id=department1.id),
+                Classroom(name="Б-201", capacity=25, faculty_id=faculty1.id, department_id=department2.id),
+                Classroom(name="К-105", capacity=35, faculty_id=faculty2.id, department_id=department3.id),
+                
+                # Аудитории факультетов
+                Classroom(name="Лекторий-1", capacity=100, faculty_id=faculty1.id),
+                Classroom(name="Лекторий-2", capacity=80, faculty_id=faculty2.id),
+                Classroom(name="Компьютерный класс-1", capacity=20, faculty_id=faculty1.id),
+                Classroom(name="Лаборатория-1", capacity=15, faculty_id=faculty2.id),
+            ]
+            session.add_all(classrooms)
+            
+            # Преподаватели
+            teachers = [
+                Teacher(full_name="Иванов Иван Иванович", department_id=department1.id),
+                Teacher(full_name="Петрова Анна Сергеевна", department_id=department1.id),
+                Teacher(full_name="Сидоров Алексей Владимирович", department_id=department2.id),
+                Teacher(full_name="Козлова Мария Дмитриевна", department_id=department3.id),
+                Teacher(full_name="Николаев Дмитрий Петрович", department_id=department3.id),
+            ]
+            session.add_all(teachers)
+            
+            # Предметы
+            subjects = [
+                Subject(name="Математический анализ", short_name="МатАн"),
+                Subject(name="Программирование на Python", short_name="Python"),
+                Subject(name="Базы данных", short_name="БД"),
+                Subject(name="Машинное обучение", short_name="МО"),
+                Subject(name="Теоретическая механика", short_name="ТерМех"),
+                Subject(name="Сопротивление материалов", short_name="СопрМат"),
+            ]
+            session.add_all(subjects)
+            session.commit()
+            
+            # Учебные планы
+            curriculum = [
+                # Для отдельных групп
+                Curriculum(
+                    subject_id=subjects[0].id,
+                    hours=72,
+                    primary_teacher_id=teachers[0].id,
+                    group_id=groups[0].id  # ПИ-101
+                ),
+                Curriculum(
+                    subject_id=subjects[1].id,
+                    hours=108,
+                    primary_teacher_id=teachers[1].id,
+                    group_id=groups[2].id  # ПИ-201
+                ),
+                Curriculum(
+                    subject_id=subjects[3].id,
+                    hours=72,
+                    primary_teacher_id=teachers[2].id,
+                    group_id=groups[4].id  # ИИ-101
+                ),
+                
+                # Для потоков
+                Curriculum(
+                    subject_id=subjects[0].id,
+                    hours=144,
+                    primary_teacher_id=teachers[0].id,
+                    secondary_teacher_id=teachers[1].id,
+                    flow_id=flow1.id  # Поток из ПИ-101 и ПИ-102
+                ),
+                Curriculum(
+                    subject_id=subjects[4].id,
+                    hours=108,
+                    primary_teacher_id=teachers[3].id,
+                    flow_id=flow2.id  # Поток из МС-101 и МС-102
+                ),
+                
+                # Сложный случай (большой поток)
+                Curriculum(
+                    subject_id=subjects[5].id,
+                    hours=72,
+                    primary_teacher_id=teachers[4].id,
+                    group_id=groups[8].id  # МС-301
+                )
+            ]
+            session.add_all(curriculum)
+            
+            # Несколько существующих занятий в расписании
+            existing_lessons = [
+                Lesson(
+                    week=1,
+                    day=1,  # Понедельник
+                    pair=1,
+                    classroom_id=classrooms[0].id,
+                    curriculum_id=curriculum[0].id,
+                    lesson_type=LessonType.LECTURE
+                ),
+                Lesson(
+                    week=1,
+                    day=1,
+                    pair=2,
+                    classroom_id=classrooms[1].id,
+                    curriculum_id=curriculum[1].id,
+                    lesson_type=LessonType.LAB
+                )
+            ]
+            session.add_all(existing_lessons)
+            
+            session.commit()
+
+    def auto_schedule(self) -> None:
+        '''Автоматическое составление расписания с учётом семестровой нагрузки'''
+        with Session(self.engine) as session:
+            # Сбор существующей занятости для недель 1 и 2
+            busy_rooms = set()
+            busy_teachers = set()
+            busy_groups = set()
+            
+            # Загрузка существующих занятий в неделях 1 и 2
+            existing_lessons = session.exec(
+                select(Lesson)
+                .where(Lesson.week.in_([1, 2]))
+            ).all()
+            
+            for lesson in existing_lessons:
+                curriculum = session.get(Curriculum, lesson.curriculum_id)
+                if not curriculum:
+                    continue
+                    
+                # Определение групп
+                group_ids = []
+                if curriculum.group_id:
+                    group_ids = [curriculum.group_id]
+                elif curriculum.flow_id:
+                    flow_groups = session.exec(
+                        select(FlowGroupLink.group_id)
+                        .where(FlowGroupLink.flow_id == curriculum.flow_id)
+                    ).all()
+                    group_ids = [g[0] for g in flow_groups]
+                
+                # Преподаватели
+                teacher_ids = [curriculum.primary_teacher_id]
+                if curriculum.secondary_teacher_id:
+                    teacher_ids.append(curriculum.secondary_teacher_id)
+                
+                # Обновление занятости
+                for gid in group_ids:
+                    busy_groups.add((lesson.week, lesson.day, lesson.pair, gid))
+                for tid in teacher_ids:
+                    busy_teachers.add((lesson.week, lesson.day, lesson.pair, tid))
+                busy_rooms.add((lesson.week, lesson.day, lesson.pair, lesson.classroom_id))
+
+            # Подготовка учебных планов
+            curriculum_data = []
+            all_curriculum = session.exec(select(Curriculum)).all()
+            
+            # Шаблоны занятий на двухнедельный цикл
+            curriculum_templates = {
+                72: [LessonType.LECTURE],  # 1 лекция за 2 недели
+                108: [LessonType.LECTURE, LessonType.LAB],  # 1 лекция + 1 лаба
+                144: [LessonType.LECTURE, LessonType.LAB, LessonType.LAB]  # 1 лекция + 2 лабы
+            }
+            
+            for curr in all_curriculum:
+                # Проверка допустимости часов
+                if curr.hours not in curriculum_templates:
+                    print(f"Недопустимое количество часов: {curr.hours} для curriculum_id={curr.id}")
+                    continue
+                    
+                # Получаем шаблон занятий для данного количества часов
+                template = curriculum_templates[curr.hours]
+                
+                # Подсчёт уже запланированных занятий каждого типа в цикле (недели 1 и 2)
+                type_counter = {LessonType.LECTURE: 0, LessonType.LAB: 0}
+                for lesson_type in template:
+                    existing_count = session.scalar(
+                        select(func.count(Lesson.id))
+                        .where(Lesson.curriculum_id == curr.id)
+                        .where(Lesson.week.in_([1, 2]))
+                        .where(Lesson.lesson_type == lesson_type)
+                    ) or 0
+                    type_counter[lesson_type] = existing_count
+                
+                # Определяем, сколько занятий каждого типа нужно добавить
+                needed_lessons = []
+                for lesson_type in template:
+                    # Сколько должно быть занятий этого типа
+                    required_count = sum(1 for t in template if t == lesson_type)
+                    # Сколько уже есть
+                    current_count = type_counter[lesson_type]
+                    # Сколько нужно добавить
+                    to_add = required_count - current_count
+                    
+                    # Добавляем в список необходимых занятий
+                    needed_lessons.extend([lesson_type] * to_add)
+                
+                if not needed_lessons:
+                    continue
+                    
+                # Определение групп и вместимости
+                group_ids = []
+                capacity_required = 0
+                if curr.group_id:
+                    group = session.get(Group, curr.group_id)
+                    if group:
+                        group_ids = [group.id]
+                        capacity_required = group.student_count
+                elif curr.flow_id:
+                    flow_groups = session.exec(
+                        select(Group)
+                        .join(FlowGroupLink, Group.id == FlowGroupLink.group_id)
+                        .where(FlowGroupLink.flow_id == curr.flow_id)
+                    ).all()
+                    group_ids = [g.id for g in flow_groups]
+                    capacity_required = sum(g.student_count for g in flow_groups)
+                
+                if not group_ids:
+                    continue
+                    
+                # Подходящие аудитории
+                classrooms = session.exec(
+                    select(Classroom)
+                    .where(Classroom.capacity >= capacity_required)
+                ).all()
+                classroom_ids = [c.id for c in classrooms]
+                
+                curriculum_data.append({
+                    'obj': curr,
+                    'needed_lessons': needed_lessons,
+                    'groups': group_ids,
+                    'teachers': [
+                        t for t in [curr.primary_teacher_id, curr.secondary_teacher_id] 
+                        if t is not None
+                    ],
+                    'classrooms': classroom_ids,
+                    'capacity_req': capacity_required
+                })
+            
+            # Сортировка по сложности (вместимость аудитории и количество групп)
+            curriculum_data.sort(key=lambda x: (-x['capacity_req'], -len(x['groups'])))
+            
+            # Распределение занятий
+            for item in curriculum_data:
+                curr = item['obj']
+                for lesson_type in item['needed_lessons']:
+                    placed = False
+                    for week in [1, 2]:
+                        for day in range(1, 7):  # Пн-Сб
+                            for pair in range(1, 9):  # 1-8 пары
+                                # Проверка групп
+                                if any(
+                                    (week, day, pair, gid) in busy_groups 
+                                    for gid in item['groups']
+                                ):
+                                    continue
+                                    
+                                # Проверка преподавателей
+                                if any(
+                                    (week, day, pair, tid) in busy_teachers 
+                                    for tid in item['teachers']
+                                ):
+                                    continue
+                                
+                                # Поиск свободной аудитории
+                                for room_id in item['classrooms']:
+                                    if (week, day, pair, room_id) in busy_rooms:
+                                        continue
+                                    
+                                    # Создание занятия
+                                    new_lesson = Lesson(
+                                        week=week,
+                                        day=day,
+                                        pair=pair,
+                                        classroom_id=room_id,
+                                        curriculum_id=curr.id,
+                                        lesson_type=lesson_type
+                                    )
+                                    session.add(new_lesson)
+                                    
+                                    # Обновление занятости
+                                    busy_rooms.add((week, day, pair, room_id))
+                                    for gid in item['groups']:
+                                        busy_groups.add((week, day, pair, gid))
+                                    for tid in item['teachers']:
+                                        busy_teachers.add((week, day, pair, tid))
+                                    
+                                    placed = True
+                                    break
+                                if placed:
+                                    break
+                            if placed:
+                                break
+                        if placed:
+                            break
+                    if not placed:
+                        print(f"Не удалось разместить curriculum_id={curr.id} (тип: {lesson_type})")
+                        
+            session.commit()
+
+    def find_collisions(self) -> dict:
+        '''Поиск коллизий и окон в расписании'''
+        with Session(self.engine) as session:
+            # Загрузка всех занятий
+            lessons = session.exec(select(Lesson)).all()
+            
+            # Структуры для анализа
+            group_schedule = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+            teacher_schedule = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+            room_schedule = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+            
+            # Заполнение структур
+            for lesson in lessons:
+                curriculum = session.get(Curriculum, lesson.curriculum_id)
+                if not curriculum:
+                    continue
+                    
+                # Определение групп
+                group_ids = []
+                if curriculum.group_id:
+                    group_ids = [curriculum.group_id]
+                elif curriculum.flow_id:
+                    # Исправление: получение простого списка ID групп
+                    flow_groups = session.exec(
+                        select(FlowGroupLink.group_id)
+                        .where(FlowGroupLink.flow_id == curriculum.flow_id)
+                    ).all()
+                    group_ids = [g for g, in flow_groups] if flow_groups and isinstance(flow_groups[0], tuple) else flow_groups
+                
+                # Преподаватели
+                teacher_ids = [curriculum.primary_teacher_id]
+                if curriculum.secondary_teacher_id:
+                    teacher_ids.append(curriculum.secondary_teacher_id)
+                
+                # Заполнение данных
+                for group_id in group_ids:
+                    group_schedule[group_id][lesson.week][lesson.day].append((lesson.pair, lesson.id))
+                
+                for teacher_id in teacher_ids:
+                    teacher_schedule[teacher_id][lesson.week][lesson.day].append((lesson.pair, lesson.id))
+                
+                room_schedule[lesson.classroom_id][lesson.week][lesson.day].append((lesson.pair, lesson.id))
+            
+            # Поиск ошибок (наложение занятий)
+            errors = []
+            
+            # Для групп
+            for group_id, weeks in group_schedule.items():
+                for week, days in weeks.items():
+                    for day, pairs in days.items():
+                        pairs.sort()
+                        for i in range(1, len(pairs)):
+                            if pairs[i][0] == pairs[i-1][0]:
+                                errors.append({
+                                    "type": "group",
+                                    "id": group_id,
+                                    "week": week,
+                                    "day": day,
+                                    "pair": pairs[i][0],
+                                    "lesson_ids": [pairs[i-1][1], pairs[i][1]]
+                                })
+            
+            # Для преподавателей
+            for teacher_id, weeks in teacher_schedule.items():
+                for week, days in weeks.items():
+                    for day, pairs in days.items():
+                        pairs.sort()
+                        for i in range(1, len(pairs)):
+                            if pairs[i][0] == pairs[i-1][0]:
+                                errors.append({
+                                    "type": "teacher",
+                                    "id": teacher_id,
+                                    "week": week,
+                                    "day": day,
+                                    "pair": pairs[i][0],
+                                    "lesson_ids": [pairs[i-1][1], pairs[i][1]]
+                                })
+            
+            # Для аудиторий
+            for room_id, weeks in room_schedule.items():
+                for week, days in weeks.items():
+                    for day, pairs in days.items():
+                        pairs.sort()
+                        for i in range(1, len(pairs)):
+                            if pairs[i][0] == pairs[i-1][0]:
+                                errors.append({
+                                    "type": "classroom",
+                                    "id": room_id,
+                                    "week": week,
+                                    "day": day,
+                                    "pair": pairs[i][0],
+                                    "lesson_ids": [pairs[i-1][1], pairs[i][1]]
+                                })
+            
+            # Поиск окон
+            group_windows = []
+            teacher_windows = []
+            
+            # Для групп
+            for group_id, weeks in group_schedule.items():
+                for week, days in weeks.items():
+                    for day, pairs in days.items():
+                        pairs.sort()
+                        for i in range(1, len(pairs)):
+                            gap = pairs[i][0] - pairs[i-1][0] - 1
+                            if gap > 0:
+                                group_windows.append({
+                                    "group_id": group_id,
+                                    "week": week,
+                                    "day": day,
+                                    "window_start_pair": pairs[i-1][0],
+                                    "window_end_pair": pairs[i][0],
+                                    "window_size": gap
+                                })
+            
+            # Для преподавателей
+            for teacher_id, weeks in teacher_schedule.items():
+                for week, days in weeks.items():
+                    for day, pairs in days.items():
+                        pairs.sort()
+                        for i in range(1, len(pairs)):
+                            gap = pairs[i][0] - pairs[i-1][0] - 1
+                            if gap > 0:
+                                teacher_windows.append({
+                                    "teacher_id": teacher_id,
+                                    "week": week,
+                                    "day": day,
+                                    "window_start_pair": pairs[i-1][0],
+                                    "window_end_pair": pairs[i][0],
+                                    "window_size": gap
+                                })
+            
+            return {
+                "errors": errors,
+                "group_windows": group_windows,
+                "teacher_windows": teacher_windows
+            }
 
 
 def get_database(db_string: str) -> Database:

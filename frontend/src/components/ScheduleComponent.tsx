@@ -3,7 +3,10 @@ import {
   UniversityType, SubjectType, FlowType, CurriculumType, GroupType,
   ScheduleData, DayNumber, PairNumber, WeekNumber, ClassroomType, LessonType
 } from '../types';
-import { addScheduleLesson, fetchRemoveSchedule, fetchEditSchedule } from '../api';
+import {
+  addScheduleLesson, fetchRemoveSchedule, fetchEditSchedule,
+  autoShedule, findCollisions
+} from '../api';
 
 
 export interface DataProps {
@@ -225,20 +228,33 @@ export const ScheduleComponent = ({
   return (
     <>
     <div>
-      <div style={{ position: 'absolute', right: '15px' }}>
-        <button
-          className={currentWeek === 1 ? 'active' : ''}
-          onClick={() => setCurrentWeek(1)}
-          style={{ marginRight: 5 }}
-        >
-          1 неделя
-        </button>
-        <button
-          className={currentWeek === 2 ? 'active' : ''}
-          onClick={() => setCurrentWeek(2)}
-        >
-          2 неделя
-        </button>
+      <div style={{ position: 'absolute', right: '25px' }}>
+        <div>
+          <button
+            className={currentWeek === 1 ? 'active' : ''}
+            onClick={() => setCurrentWeek(1)}
+            style={{ marginRight: 5 }}
+          >
+            1 неделя
+          </button>
+          <button
+            className={currentWeek === 2 ? 'active' : ''}
+            onClick={() => setCurrentWeek(2)}
+          >
+            2 неделя
+          </button>
+        </div>
+
+        <div>
+          <button onClick={autoShedule}>
+            Построить расписание (автоматически)
+          </button>
+        </div>
+        <div>
+          <button onClick={findCollisions}>
+            Найти коллизии (автоматически)
+          </button>
+        </div>
       </div>
       <div>
         {universityData.map((university) => (

@@ -272,3 +272,11 @@ class Database(abc.ABC):
     @abc.abstractmethod
     def remove_schedule_cell(self, id: int) -> None:
         '''Удаляет ячейку расписания занятий'''
+
+    @abc.abstractmethod
+    def auto_schedule(self) -> None:
+        '''Автоматическое составление расписания с учётом семестровой нагрузки'''
+
+    @abc.abstractmethod
+    def find_collisions(self) -> dict:
+        '''Поиск коллизий и окон в расписании'''

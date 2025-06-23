@@ -19,6 +19,7 @@ logging.basicConfig(
 def main() -> int:
     '''Метод для запуска веб-API'''
     db = get_database('sqlite:///test_schedule.sqlite')
+    #db.create_test_data()
     web_app = WebApp(db, (LISTEN_HOST, DEFAULT_LISTEN_PORT))
     web_app.serve()
 

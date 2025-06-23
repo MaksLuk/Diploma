@@ -75,6 +75,12 @@ class WebApp:
             '/schedule', self.remove_schedule_cell, methods=["DELETE"]
         )
         self.app.add_api_route('/university_data', self.db.get_university_data)
+        self.app.add_api_route(
+            '/auto_create_schedule', self.db.auto_schedule, methods=["POST"]
+        )
+        self.app.add_api_route(
+            '/find_collisions', self.db.find_collisions, methods=["POST"]
+        )
 
     def add_structural_divizion(
         self,
